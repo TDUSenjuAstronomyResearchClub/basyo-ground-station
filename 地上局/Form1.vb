@@ -11,15 +11,16 @@ Public Class Form1
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Dim jsonSerializer As New DataContractJsonSerializer(GetType(SensorData))
         'データを受け取ったらデシリアライズするハンドラを追加
-        AddHandler MyPort.DataReceived, Sub()
-                                            Dim buffer As String = MyPort.ReadExisting()
-                                            Dim data As Byte() = Encoding.UTF8.GetBytes(buffer)
-                                            Dim stream As New MemoryStream(data)
-                                            Dim sensorData As SensorData = DirectCast(jsonSerializer.ReadObject(stream), SensorData)
+        AddHandler MyPort.DataReceived,
+            Sub()
+                Dim buffer As String = MyPort.ReadExisting()
+                Dim data As Byte() = Encoding.UTF8.GetBytes(buffer)
+                Dim stream As New MemoryStream(data)
+                Dim sensorData As SensorData = DirectCast(jsonSerializer.ReadObject(stream), SensorData)
 
-                                            ' sensorDataにデータが格納されているので値を取り出して使う
+                ' sensorDataにデータが格納されているので値を取り出して使う
 
-                                        End Sub
+            End Sub
 
         MyPort.Open()
     End Sub
