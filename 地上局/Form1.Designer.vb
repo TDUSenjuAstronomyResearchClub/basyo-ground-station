@@ -22,211 +22,191 @@ Partial Class Form1
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
+        Dim ChartArea1 As DataVisualization.Charting.ChartArea = New DataVisualization.Charting.ChartArea()
+        Dim Legend1 As DataVisualization.Charting.Legend = New DataVisualization.Charting.Legend()
+        Dim Series1 As DataVisualization.Charting.Series = New DataVisualization.Charting.Series()
+        Dim ChartArea2 As DataVisualization.Charting.ChartArea = New DataVisualization.Charting.ChartArea()
+        Dim Legend2 As DataVisualization.Charting.Legend = New DataVisualization.Charting.Legend()
+        Dim Series2 As DataVisualization.Charting.Series = New DataVisualization.Charting.Series()
+        Dim ChartArea3 As DataVisualization.Charting.ChartArea = New DataVisualization.Charting.ChartArea()
+        Dim Legend3 As DataVisualization.Charting.Legend = New DataVisualization.Charting.Legend()
+        Dim Series3 As DataVisualization.Charting.Series = New DataVisualization.Charting.Series()
+        Dim ChartArea4 As DataVisualization.Charting.ChartArea = New DataVisualization.Charting.ChartArea()
+        Dim Legend4 As DataVisualization.Charting.Legend = New DataVisualization.Charting.Legend()
+        Dim Series4 As DataVisualization.Charting.Series = New DataVisualization.Charting.Series()
         PictureBox1 = New PictureBox()
         Label1 = New Label()
         TextBox1 = New TextBox()
         TextBox2 = New TextBox()
         PictureBox2 = New PictureBox()
         PictureBox3 = New PictureBox()
-        PictureBox4 = New PictureBox()
-        PictureBox5 = New PictureBox()
-        PictureBox6 = New PictureBox()
-        PictureBox7 = New PictureBox()
-        PictureBox8 = New PictureBox()
-        PictureBox9 = New PictureBox()
-        PictureBox10 = New PictureBox()
-        PictureBox11 = New PictureBox()
-        PictureBox12 = New PictureBox()
-        PictureBox13 = New PictureBox()
         TextBox3 = New TextBox()
+        Chart1 = New DataVisualization.Charting.Chart()
+        Chart2 = New DataVisualization.Charting.Chart()
+        Chart3 = New DataVisualization.Charting.Chart()
+        Chart4 = New DataVisualization.Charting.Chart()
         CType(PictureBox1, ComponentModel.ISupportInitialize).BeginInit()
         CType(PictureBox2, ComponentModel.ISupportInitialize).BeginInit()
         CType(PictureBox3, ComponentModel.ISupportInitialize).BeginInit()
-        CType(PictureBox4, ComponentModel.ISupportInitialize).BeginInit()
-        CType(PictureBox5, ComponentModel.ISupportInitialize).BeginInit()
-        CType(PictureBox6, ComponentModel.ISupportInitialize).BeginInit()
-        CType(PictureBox7, ComponentModel.ISupportInitialize).BeginInit()
-        CType(PictureBox8, ComponentModel.ISupportInitialize).BeginInit()
-        CType(PictureBox9, ComponentModel.ISupportInitialize).BeginInit()
-        CType(PictureBox10, ComponentModel.ISupportInitialize).BeginInit()
-        CType(PictureBox11, ComponentModel.ISupportInitialize).BeginInit()
-        CType(PictureBox12, ComponentModel.ISupportInitialize).BeginInit()
-        CType(PictureBox13, ComponentModel.ISupportInitialize).BeginInit()
+        CType(Chart1, ComponentModel.ISupportInitialize).BeginInit()
+        CType(Chart2, ComponentModel.ISupportInitialize).BeginInit()
+        CType(Chart3, ComponentModel.ISupportInitialize).BeginInit()
+        CType(Chart4, ComponentModel.ISupportInitialize).BeginInit()
         SuspendLayout()
         ' 
         ' PictureBox1
         ' 
-        PictureBox1.Location = New Point(12, 25)
+        PictureBox1.Location = New Point(14, 33)
+        PictureBox1.Margin = New Padding(3, 4, 3, 4)
         PictureBox1.Name = "PictureBox1"
-        PictureBox1.Size = New Size(256, 159)
+        PictureBox1.Size = New Size(293, 212)
         PictureBox1.TabIndex = 0
         PictureBox1.TabStop = False
         ' 
         ' Label1
         ' 
         Label1.AutoSize = True
-        Label1.Location = New Point(12, 7)
+        Label1.Location = New Point(14, 9)
         Label1.Name = "Label1"
-        Label1.Size = New Size(32, 15)
+        Label1.Size = New Size(42, 20)
         Label1.TabIndex = 1
-        Label1.Text = "Time" ' 
+        Label1.Text = "Time"
+        ' 
         ' TextBox1
         ' 
-        TextBox1.Location = New Point(274, 345)
+        TextBox1.Location = New Point(313, 460)
+        TextBox1.Margin = New Padding(3, 4, 3, 4)
         TextBox1.Name = "TextBox1"
-        TextBox1.Size = New Size(386, 23)
+        TextBox1.Size = New Size(441, 27)
         TextBox1.TabIndex = 3
         ' 
         ' TextBox2
         ' 
-        TextBox2.Location = New Point(12, 407)
+        TextBox2.Location = New Point(14, 543)
+        TextBox2.Margin = New Padding(3, 4, 3, 4)
         TextBox2.Name = "TextBox2"
-        TextBox2.Size = New Size(254, 23)
+        TextBox2.Size = New Size(290, 27)
         TextBox2.TabIndex = 4
         ' 
         ' PictureBox2
         ' 
-        PictureBox2.Location = New Point(274, 25)
+        PictureBox2.Location = New Point(313, 33)
+        PictureBox2.Margin = New Padding(3, 4, 3, 4)
         PictureBox2.Name = "PictureBox2"
-        PictureBox2.Size = New Size(199, 241)
+        PictureBox2.Size = New Size(227, 321)
         PictureBox2.TabIndex = 6
         PictureBox2.TabStop = False
         ' 
         ' PictureBox3
         ' 
-        PictureBox3.Location = New Point(479, 25)
+        PictureBox3.Location = New Point(547, 33)
+        PictureBox3.Margin = New Padding(3, 4, 3, 4)
         PictureBox3.Name = "PictureBox3"
-        PictureBox3.Size = New Size(181, 241)
+        PictureBox3.Size = New Size(207, 321)
         PictureBox3.TabIndex = 6
         PictureBox3.TabStop = False
         ' 
-        ' PictureBox4
-        ' 
-        PictureBox4.Location = New Point(666, 26)
-        PictureBox4.Name = "PictureBox4"
-        PictureBox4.Size = New Size(98, 76)
-        PictureBox4.TabIndex = 7
-        PictureBox4.TabStop = False
-        ' 
-        ' PictureBox5
-        ' 
-        PictureBox5.Location = New Point(770, 26)
-        PictureBox5.Name = "PictureBox5"
-        PictureBox5.Size = New Size(98, 76)
-        PictureBox5.TabIndex = 7
-        PictureBox5.TabStop = False
-        ' 
-        ' PictureBox6
-        ' 
-        PictureBox6.Location = New Point(666, 108)
-        PictureBox6.Name = "PictureBox6"
-        PictureBox6.Size = New Size(98, 76)
-        PictureBox6.TabIndex = 7
-        PictureBox6.TabStop = False
-        ' 
-        ' PictureBox7
-        ' 
-        PictureBox7.Location = New Point(770, 108)
-        PictureBox7.Name = "PictureBox7"
-        PictureBox7.Size = New Size(98, 76)
-        PictureBox7.TabIndex = 7
-        PictureBox7.TabStop = False
-        ' 
-        ' PictureBox8
-        ' 
-        PictureBox8.Location = New Point(666, 190)
-        PictureBox8.Name = "PictureBox8"
-        PictureBox8.Size = New Size(98, 76)
-        PictureBox8.TabIndex = 7
-        PictureBox8.TabStop = False
-        ' 
-        ' PictureBox9
-        ' 
-        PictureBox9.Location = New Point(770, 190)
-        PictureBox9.Name = "PictureBox9"
-        PictureBox9.Size = New Size(98, 76)
-        PictureBox9.TabIndex = 7
-        PictureBox9.TabStop = False
-        ' 
-        ' PictureBox10
-        ' 
-        PictureBox10.Location = New Point(666, 272)
-        PictureBox10.Name = "PictureBox10"
-        PictureBox10.Size = New Size(98, 76)
-        PictureBox10.TabIndex = 7
-        PictureBox10.TabStop = False
-        ' 
-        ' PictureBox11
-        ' 
-        PictureBox11.Location = New Point(768, 272)
-        PictureBox11.Name = "PictureBox11"
-        PictureBox11.Size = New Size(98, 76)
-        PictureBox11.TabIndex = 7
-        PictureBox11.TabStop = False
-        ' 
-        ' PictureBox12
-        ' 
-        PictureBox12.Location = New Point(666, 354)
-        PictureBox12.Name = "PictureBox12"
-        PictureBox12.Size = New Size(98, 76)
-        PictureBox12.TabIndex = 7
-        PictureBox12.TabStop = False
-        ' 
-        ' PictureBox13
-        ' 
-        PictureBox13.Location = New Point(770, 354)
-        PictureBox13.Name = "PictureBox13"
-        PictureBox13.Size = New Size(98, 76)
-        PictureBox13.TabIndex = 7
-        PictureBox13.TabStop = False
-        ' 
         ' TextBox3
         ' 
-        TextBox3.Location = New Point(12, 190)
+        TextBox3.Location = New Point(14, 253)
+        TextBox3.Margin = New Padding(3, 4, 3, 4)
         TextBox3.Multiline = True
         TextBox3.Name = "TextBox3"
         TextBox3.ReadOnly = True
-        TextBox3.Size = New Size(256, 211)
+        TextBox3.Size = New Size(292, 280)
         TextBox3.TabIndex = 8
         TextBox3.TextAlign = HorizontalAlignment.Center
         ' 
+        ' Chart1
+        ' 
+        ChartArea1.Name = "ChartArea1"
+        Chart1.ChartAreas.Add(ChartArea1)
+        Legend1.Name = "Legend1"
+        Chart1.Legends.Add(Legend1)
+        Chart1.Location = New Point(760, 33)
+        Chart1.Name = "Chart1"
+        Series1.ChartArea = "ChartArea1"
+        Series1.Legend = "Legend1"
+        Series1.Name = "Series1"
+        Chart1.Series.Add(Series1)
+        Chart1.Size = New Size(371, 209)
+        Chart1.TabIndex = 9
+        Chart1.Text = "Chart1"
+        ' 
+        ' Chart2
+        ' 
+        ChartArea2.Name = "ChartArea1"
+        Chart2.ChartAreas.Add(ChartArea2)
+        Legend2.Name = "Legend1"
+        Chart2.Legends.Add(Legend2)
+        Chart2.Location = New Point(760, 253)
+        Chart2.Name = "Chart2"
+        Series2.ChartArea = "ChartArea1"
+        Series2.Legend = "Legend1"
+        Series2.Name = "Series1"
+        Chart2.Series.Add(Series2)
+        Chart2.Size = New Size(371, 209)
+        Chart2.TabIndex = 10
+        Chart2.Text = "Chart2"
+        ' 
+        ' Chart3
+        ' 
+        ChartArea3.Name = "ChartArea1"
+        Chart3.ChartAreas.Add(ChartArea3)
+        Legend3.Name = "Legend1"
+        Chart3.Legends.Add(Legend3)
+        Chart3.Location = New Point(760, 468)
+        Chart3.Name = "Chart3"
+        Series3.ChartArea = "ChartArea1"
+        Series3.Legend = "Legend1"
+        Series3.Name = "Series1"
+        Chart3.Series.Add(Series3)
+        Chart3.Size = New Size(371, 209)
+        Chart3.TabIndex = 11
+        Chart3.Text = "Chart3"
+        ' 
+        ' Chart4
+        ' 
+        ChartArea4.Name = "ChartArea1"
+        Chart4.ChartAreas.Add(ChartArea4)
+        Legend4.Name = "Legend1"
+        Chart4.Legends.Add(Legend4)
+        Chart4.Location = New Point(1137, 36)
+        Chart4.Name = "Chart4"
+        Series4.ChartArea = "ChartArea1"
+        Series4.Legend = "Legend1"
+        Series4.Name = "Series1"
+        Chart4.Series.Add(Series4)
+        Chart4.Size = New Size(371, 209)
+        Chart4.TabIndex = 12
+        Chart4.Text = "Chart4"
+        ' 
         ' Form1
         ' 
-        AutoScaleDimensions = New SizeF(7F, 15F)
+        AutoScaleDimensions = New SizeF(8.0F, 20.0F)
         AutoScaleMode = AutoScaleMode.Font
-        ClientSize = New Size(878, 442)
+        ClientSize = New Size(1671, 734)
+        Controls.Add(Chart4)
+        Controls.Add(Chart3)
+        Controls.Add(Chart2)
+        Controls.Add(Chart1)
         Controls.Add(TextBox3)
-        Controls.Add(PictureBox13)
-        Controls.Add(PictureBox11)
-        Controls.Add(PictureBox9)
-        Controls.Add(PictureBox7)
-        Controls.Add(PictureBox12)
-        Controls.Add(PictureBox10)
-        Controls.Add(PictureBox8)
-        Controls.Add(PictureBox6)
-        Controls.Add(PictureBox5)
-        Controls.Add(PictureBox4)
         Controls.Add(PictureBox3)
         Controls.Add(PictureBox2)
         Controls.Add(TextBox2)
         Controls.Add(TextBox1)
         Controls.Add(Label1)
         Controls.Add(PictureBox1)
+        Margin = New Padding(3, 4, 3, 4)
         Name = "Form1"
         Text = "UI"
         CType(PictureBox1, ComponentModel.ISupportInitialize).EndInit()
         CType(PictureBox2, ComponentModel.ISupportInitialize).EndInit()
         CType(PictureBox3, ComponentModel.ISupportInitialize).EndInit()
-        CType(PictureBox4, ComponentModel.ISupportInitialize).EndInit()
-        CType(PictureBox5, ComponentModel.ISupportInitialize).EndInit()
-        CType(PictureBox6, ComponentModel.ISupportInitialize).EndInit()
-        CType(PictureBox7, ComponentModel.ISupportInitialize).EndInit()
-        CType(PictureBox8, ComponentModel.ISupportInitialize).EndInit()
-        CType(PictureBox9, ComponentModel.ISupportInitialize).EndInit()
-        CType(PictureBox10, ComponentModel.ISupportInitialize).EndInit()
-        CType(PictureBox11, ComponentModel.ISupportInitialize).EndInit()
-        CType(PictureBox12, ComponentModel.ISupportInitialize).EndInit()
-        CType(PictureBox13, ComponentModel.ISupportInitialize).EndInit()
+        CType(Chart1, ComponentModel.ISupportInitialize).EndInit()
+        CType(Chart2, ComponentModel.ISupportInitialize).EndInit()
+        CType(Chart3, ComponentModel.ISupportInitialize).EndInit()
+        CType(Chart4, ComponentModel.ISupportInitialize).EndInit()
         ResumeLayout(False)
         PerformLayout()
     End Sub
@@ -237,15 +217,9 @@ Partial Class Form1
     Friend WithEvents TextBox2 As TextBox
     Friend WithEvents PictureBox2 As PictureBox
     Friend WithEvents PictureBox3 As PictureBox
-    Friend WithEvents PictureBox4 As PictureBox
-    Friend WithEvents PictureBox5 As PictureBox
-    Friend WithEvents PictureBox6 As PictureBox
-    Friend WithEvents PictureBox7 As PictureBox
-    Friend WithEvents PictureBox8 As PictureBox
-    Friend WithEvents PictureBox9 As PictureBox
-    Friend WithEvents PictureBox10 As PictureBox
-    Friend WithEvents PictureBox11 As PictureBox
-    Friend WithEvents PictureBox12 As PictureBox
-    Friend WithEvents PictureBox13 As PictureBox
     Friend WithEvents TextBox3 As TextBox
+    Friend WithEvents Chart1 As DataVisualization.Charting.Chart
+    Friend WithEvents Chart2 As DataVisualization.Charting.Chart
+    Friend WithEvents Chart3 As DataVisualization.Charting.Chart
+    Friend WithEvents Chart4 As DataVisualization.Charting.Chart
 End Class
