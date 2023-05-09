@@ -52,7 +52,7 @@ Public Class Form1
                 End If
                 Chart2.Invalidate()
 
-                'Chart3_湿度
+                'Chart3_気圧
                 Chart3.Series("Series1").Points.AddY(sensorData.TemperatureHumidityPressure.Humidity)
                 If Chart3.Series(0).Points.Count = 10 Then '表示する分
                     Chart3.Series(0).Points.RemoveAt(0)
