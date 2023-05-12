@@ -3,6 +3,7 @@ Imports System.IO.Ports
 Imports System.Runtime.Serialization
 Imports System.Runtime.Serialization.Json
 Imports System.Text
+Imports System.Windows.Forms.VisualStyles.VisualStyleElement
 
 Public Class Form1
     Dim WithEvents MyPort As New SerialPort("COM8", 9600)
@@ -58,18 +59,25 @@ Public Class Form1
                     Chart3.Series(0).Points.RemoveAt(0)
                 End If
                 Chart3.Invalidate()
-
+                Dim Time As Integer = sensorData.Time
+                TextBox3.Invoke(Sub() TextBox3.Text = Time.ToString())
+                Dim Latitude As Integer = sensorData.GPS.Latitude
+                TextBox3.Invoke(Sub() TextBox3.Text = Latitude.ToString())
+                Dim Longitude As Integer = sensorData.GPS.Longitude
+                TextBox3.Invoke(Sub() TextBox3.Text = Longitude.ToString())
+                Dim Altitude As Integer = sensorData.GPS.Altitude
+                TextBox3.Invoke(Sub() TextBox3.Text = Altitude.ToString())
+                Dim sDis As Integer = sensorData.GPS.Sample.Distance
+                TextBox3.Invoke(Sub() TextBox3.Text = sDis.ToString())
+                Dim sAzi As Integer = sensorData.GPS.Sample.Azimuth
+                TextBox3.Invoke(Sub() TextBox3.Text = sAzi.ToString())
+                Dim gDis As Integer = sensorData.GPS.Goal.Distance
+                TextBox3.Invoke(Sub() TextBox3.Text = gDis.ToString())
+                Dim gAzi As Integer = sensorData.GPS.Goal.Azimuth
+                TextBox3.Invoke(Sub() TextBox3.Text = gAzi.ToString())
 
             End Sub
-
-        MyPort.Open()
     End Sub
-
-    'フォームが閉じるときにポートを閉める
-    Private Sub Form1_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
-        MyPort.Close()
-    End Sub
-
 End Class
 
 'JSONマッピング用データクラス群
@@ -106,12 +114,33 @@ End Class
 <DataContract>
 Public Class NineAxisData
     <DataMember(Name:="加速度")>
-    Public Property Acceleration As Integer
+    Public Property Acceleration As AccelerationData
     <DataMember(Name:="角速度")>
-    Public Property AngularVelocity As Integer
+    Public Property AngularVelocity As AnggularVelocityData
     <DataMember(Name:="方位角")>
     Public Property Azimuth As Integer
 End Class
+
+<DataContract>
+Public Class AccelerationData
+    <DataMember(Name:="X")>
+    Public Property AccX As Integer
+    <DataMember(Name:="Y")>
+    Public Property AccY As Integer
+    <DataMember(Name:="Z")>
+    Public Property AccZ As Integer
+End Class
+
+<DataContract>
+Public Class AnggularVelocityData
+    <DataMember(Name:="X")>
+    Public Property AngX As Integer
+    <DataMember(Name:="Y")>
+    Public Property AngY As Integer
+    <DataMember(Name:="Z")>
+    Public Property AngZ As Integer
+End Class
+
 
 <DataContract>
 Public Class TemperatureHumidityPressureData
@@ -135,6 +164,8 @@ End Class
 
 <DataContract>
 Public Class SensorData
+    <DataMember(Name:="時間")>
+    Public Property Time As Integer
     <DataMember(Name:="GPS")>
     Public Property GPS As GPSData
     <DataMember(Name:="9軸")>
