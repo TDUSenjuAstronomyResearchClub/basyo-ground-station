@@ -7,7 +7,22 @@ Imports System.Windows.Forms.VisualStyles.VisualStyleElement
 
 Public Class Form1
     Dim WithEvents MyPort As New SerialPort("COM8", 9600)
-
+    Dim isSerialConnected As Boolean = False
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click   'ボタンを押すと通信開始
+        If Not isSerialConnected Then ' シリアルポートが未接続の場合
+            Try
+                MyPort.Open() ' シリアルポートを開く
+                isSerialConnected = True ' シリアルポート接続フラグをTrueにする
+                Button1.Text = "通信停止" ' ボタンのテキストを変更する
+            Catch ex As Exception
+                MessageBox.Show(ex.Message, "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            End Try
+        Else
+            MyPort.Close() ' シリアルポートを閉じる
+            isSerialConnected = False ' シリアルポート接続フラグをFalseにする
+            Button1.Text = "通信開始"
+        End If
+    End Sub
     'フォームを読み込むときにポートを解放し、ハンドラを追加する
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
