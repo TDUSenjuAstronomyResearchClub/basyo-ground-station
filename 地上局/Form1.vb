@@ -26,21 +26,21 @@ Public Class Form1
     'フォームを読み込むときにポートを解放し、ハンドラを追加する
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
-        'Chart1の設定
+        'Chart1の設定(温度）
         Dim aw As String
         aw = 300
-        Chart1.Series("Series1").Points.AddY(aw)
-        Chart1.Series("Series1").IsValueShownAsLabel = False
+        Chart1.Series("Temperature").Points.AddY(aw)
+        Chart1.Series("Temperature").IsValueShownAsLabel = False
         Chart1.ChartAreas("ChartArea1").AxisX.Enabled = DataVisualization.Charting.AxisEnabled.False
 
-        'Chart2の設定
-        Chart2.Series("Series1").Points.AddY(aw)
-        Chart2.Series("Series1").IsValueShownAsLabel = False
+        'Chart2の設定(湿度）
+        Chart2.Series("Humidity").Points.AddY(aw)
+        Chart2.Series("Humidity").IsValueShownAsLabel = False
         Chart2.ChartAreas("ChartArea1").AxisX.Enabled = DataVisualization.Charting.AxisEnabled.False
 
-        'Chart3の設定
-        Chart3.Series("Series1").Points.AddY(aw)
-        Chart3.Series("Series1").IsValueShownAsLabel = False
+        'Chart3の設定(気圧）
+        Chart3.Series("Pressure").Points.AddY(aw)
+        Chart3.Series("Pressure").IsValueShownAsLabel = False
         Chart3.ChartAreas("ChartArea1").AxisX.Enabled = DataVisualization.Charting.AxisEnabled.False
 
         Dim jsonSerializer As New DataContractJsonSerializer(GetType(SensorData))
@@ -55,21 +55,21 @@ Public Class Form1
                 ' sensorDataにデータが格納されているので値を取り出して使う
 
                 'Chart1_温度
-                Chart1.Series("Series1").Points.AddY(sensorData.TemperatureHumidityPressure.Temperature)
+                Chart1.Series("Temperature").Points.AddY(sensorData.TemperatureHumidityPressure.Temperature)
                 If Chart1.Series(0).Points.Count = 10 Then '表示する分
                     Chart1.Series(0).Points.RemoveAt(0)
                 End If
                 Chart1.Invalidate()
 
                 'Chart2_湿度
-                Chart2.Series("Series1").Points.AddY(sensorData.TemperatureHumidityPressure.Humidity)
+                Chart2.Series("Humidity").Points.AddY(sensorData.TemperatureHumidityPressure.Humidity)
                 If Chart2.Series(0).Points.Count = 10 Then '表示する分
                     Chart2.Series(0).Points.RemoveAt(0)
                 End If
                 Chart2.Invalidate()
 
                 'Chart3_気圧
-                Chart3.Series("Series1").Points.AddY(sensorData.TemperatureHumidityPressure.Humidity)
+                Chart3.Series("Pressure").Points.AddY(sensorData.TemperatureHumidityPressure.Pressure)
                 If Chart3.Series(0).Points.Count = 10 Then '表示する分
                     Chart3.Series(0).Points.RemoveAt(0)
                 End If
@@ -160,11 +160,11 @@ End Class
 <DataContract>
 Public Class TemperatureHumidityPressureData
     <DataMember(Name:="温度")>
-    Public Property Temperature As Integer
+    Public Property Temperature As Single
     <DataMember(Name:="湿度")>
-    Public Property Humidity As Integer
+    Public Property Humidity As Single
     <DataMember(Name:="気圧")>
-    Public Property Pressure As Integer
+    Public Property Pressure As Single
 End Class
 
 <DataContract>
