@@ -50,22 +50,11 @@ Public Class Form1
         'データを受け取ったらデシリアライズするハンドラを追加
         AddHandler MyPort.DataReceived,
             Sub()
-                'Dim buffer As String = MyPort.ReadExisting()
-                'Dim data As Byte() = Encoding.UTF8.GetBytes(buffer)
-                'Dim stream As New MemoryStream(data)
-                'Dim sensorData As SensorData = TryCast(jsonSerializer.ReadObject(stream), SensorData)
-
-
-                ' バイナリデータをUTF-8テキストに変換
-                'Dim receivedText As String = Encoding.UTF8.GetString(receivedBytes)
                 Dim encodedData As String = MyPort.ReadLine()
-
                 ' データをUTF-8からデコード
                 Dim decodedData As String = Encoding.UTF8.GetString(Convert.FromBase64String(encodedData))
-
                 ' JSONデシリアライズ
                 Dim sensorData As SensorData = JsonConvert.DeserializeObject(Of SensorData)(decodedData)
-
                 ' sensorDataにデータが格納されているので値を取り出して使う
                 Dim Time As Integer = sensorData.Time
                 TextBox3.Invoke(Sub() TextBox3.Text = Time.ToString())
