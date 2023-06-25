@@ -1,9 +1,7 @@
-﻿Imports System.IO
-Imports System.IO.Ports
+﻿Imports System.IO.Ports
 Imports System.Runtime.Serialization
 Imports System.Runtime.Serialization.Json
 Imports System.Text
-Imports System.Windows.Forms.VisualStyles.VisualStyleElement
 Imports Newtonsoft.Json
 
 Public Class Form1
@@ -55,6 +53,7 @@ Public Class Form1
                 Dim decodedData As String = Encoding.UTF8.GetString(Convert.FromBase64String(encodedData))
                 ' JSONデシリアライズ
                 Dim sensorData As SensorData = JsonConvert.DeserializeObject(Of SensorData)(decodedData)
+
                 ' sensorDataにデータが格納されているので値を取り出して使う
                 Dim Time As Integer = sensorData.Time
                 TextBox3.Invoke(Sub() TextBox3.Text = Time.ToString())
