@@ -104,7 +104,7 @@ Partial Class Form1
         ' 
         ' TextBox3
         ' 
-        TextBox3.Location = New Point(12, 190)
+        TextBox3.Location = New Point(10, 190)
         TextBox3.Multiline = True
         TextBox3.Name = "TextBox3"
         TextBox3.ReadOnly = True
@@ -193,7 +193,7 @@ Partial Class Form1
         ' 
         AutoScaleDimensions = New SizeF(7F, 15F)
         AutoScaleMode = AutoScaleMode.Font
-        ClientSize = New Size(1462, 550)
+        ClientSize = New Size(1330, 550)
         Controls.Add(Button1)
         Controls.Add(Chart4)
         Controls.Add(Chart3)

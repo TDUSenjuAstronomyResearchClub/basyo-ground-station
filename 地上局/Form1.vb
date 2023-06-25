@@ -4,9 +4,10 @@ Imports System.Runtime.Serialization
 Imports System.Runtime.Serialization.Json
 Imports System.Text
 Imports System.Windows.Forms.VisualStyles.VisualStyleElement
+Imports Newtonsoft.Json
 
 Public Class Form1
-    Dim WithEvents MyPort As New SerialPort("COM8", 9600)
+    Dim WithEvents MyPort As New SerialPort("COM4", 9600)
     Dim isSerialConnected As Boolean = False
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click   'ボタンを押すと通信開始
         If Not isSerialConnected Then ' シリアルポートが未接続の場合
@@ -43,16 +44,45 @@ Public Class Form1
         Chart3.Series("Series1").IsValueShownAsLabel = False
         Chart3.ChartAreas("ChartArea1").AxisX.Enabled = DataVisualization.Charting.AxisEnabled.False
 
-        Dim jsonSerializer As New DataContractJsonSerializer(GetType(SensorData))
+        Dim jsonSettings As New DataContractJsonSerializerSettings()
+        jsonSettings.UseSimpleDictionaryFormat = True
+        Dim jsonSerializer As New DataContractJsonSerializer(GetType(SensorData), jsonSettings)
         'データを受け取ったらデシリアライズするハンドラを追加
         AddHandler MyPort.DataReceived,
             Sub()
-                Dim buffer As String = MyPort.ReadExisting()
-                Dim data As Byte() = Encoding.UTF8.GetBytes(buffer)
-                Dim stream As New MemoryStream(data)
-                Dim sensorData As SensorData = DirectCast(jsonSerializer.ReadObject(stream), SensorData)
+                'Dim buffer As String = MyPort.ReadExisting()
+                'Dim data As Byte() = Encoding.UTF8.GetBytes(buffer)
+                'Dim stream As New MemoryStream(data)
+                'Dim sensorData As SensorData = TryCast(jsonSerializer.ReadObject(stream), SensorData)
+
+
+                ' バイナリデータをUTF-8テキストに変換
+                'Dim receivedText As String = Encoding.UTF8.GetString(receivedBytes)
+                Dim encodedData As String = MyPort.ReadLine()
+
+                ' データをUTF-8からデコード
+                Dim decodedData As String = Encoding.UTF8.GetString(Convert.FromBase64String(encodedData))
+
+                ' JSONデシリアライズ
+                Dim sensorData As SensorData = JsonConvert.DeserializeObject(Of SensorData)(decodedData)
 
                 ' sensorDataにデータが格納されているので値を取り出して使う
+                Dim Time As Integer = sensorData.Time
+                TextBox3.Invoke(Sub() TextBox3.Text = Time.ToString())
+                Dim Latitude As Integer = sensorData.GPS.Latitude
+                TextBox3.Invoke(Sub() TextBox3.Text = Latitude.ToString())
+                Dim Longitude As Integer = sensorData.GPS.Longitude
+                TextBox3.Invoke(Sub() TextBox3.Text = Longitude.ToString())
+                Dim Altitude As Integer = sensorData.GPS.Altitude
+                TextBox3.Invoke(Sub() TextBox3.Text = Altitude.ToString())
+                Dim sDis As Integer = sensorData.GPS.Sample.Distance
+                TextBox3.Invoke(Sub() TextBox3.Text = sDis.ToString())
+                Dim sAzi As Integer = sensorData.GPS.Sample.Azimuth
+                TextBox3.Invoke(Sub() TextBox3.Text = sAzi.ToString())
+                Dim gDis As Integer = sensorData.GPS.Goal.Distance
+                TextBox3.Invoke(Sub() TextBox3.Text = gDis.ToString())
+                Dim gAzi As Integer = sensorData.GPS.Goal.Azimuth
+                TextBox3.Invoke(Sub() TextBox3.Text = gAzi.ToString())
 
                 'Chart1_温度
                 Chart1.Series("Series1").Points.AddY(sensorData.TemperatureHumidityPressure.Temperature)
@@ -74,28 +104,32 @@ Public Class Form1
                     Chart3.Series(0).Points.RemoveAt(0)
                 End If
                 Chart3.Invalidate()
-                Dim Time As Integer = sensorData.Time
-                TextBox3.Invoke(Sub() TextBox3.Text = Time.ToString())
-                Dim Latitude As Integer = sensorData.GPS.Latitude
-                TextBox3.Invoke(Sub() TextBox3.Text = Latitude.ToString())
-                Dim Longitude As Integer = sensorData.GPS.Longitude
-                TextBox3.Invoke(Sub() TextBox3.Text = Longitude.ToString())
-                Dim Altitude As Integer = sensorData.GPS.Altitude
-                TextBox3.Invoke(Sub() TextBox3.Text = Altitude.ToString())
-                Dim sDis As Integer = sensorData.GPS.Sample.Distance
-                TextBox3.Invoke(Sub() TextBox3.Text = sDis.ToString())
-                Dim sAzi As Integer = sensorData.GPS.Sample.Azimuth
-                TextBox3.Invoke(Sub() TextBox3.Text = sAzi.ToString())
-                Dim gDis As Integer = sensorData.GPS.Goal.Distance
-                TextBox3.Invoke(Sub() TextBox3.Text = gDis.ToString())
-                Dim gAzi As Integer = sensorData.GPS.Goal.Azimuth
-                TextBox3.Invoke(Sub() TextBox3.Text = gAzi.ToString())
+
 
             End Sub
     End Sub
+
 End Class
 
 'JSONマッピング用データクラス群
+<DataContract>
+Public Class SensorData
+    <DataMember(Name:="時間")>
+    Public Property Time As Integer
+    <DataMember(Name:="GPS")>
+    Public Property GPS As GPSData
+    <DataMember(Name:="9軸")>
+    Public Property NineAxis As NineAxisData
+    <DataMember(Name:="温湿度気圧")>
+    Public Property TemperatureHumidityPressure As TemperatureHumidityPressureData
+    <DataMember(Name:="気圧")>
+    Public Property Pressure As PressureData
+    <DataMember(Name:="電池")>
+    Public Property Battery As Integer
+    <DataMember(Name:="距離")>
+    Public Property Distance As Integer
+End Class
+
 <DataContract>
 Public Class GPSData
     <DataMember(Name:="緯度")>
@@ -177,20 +211,3 @@ Public Class PressureData
     Public Property Altitude As Integer
 End Class
 
-<DataContract>
-Public Class SensorData
-    <DataMember(Name:="時間")>
-    Public Property Time As Integer
-    <DataMember(Name:="GPS")>
-    Public Property GPS As GPSData
-    <DataMember(Name:="9軸")>
-    Public Property NineAxis As NineAxisData
-    <DataMember(Name:="温湿度気圧")>
-    Public Property TemperatureHumidityPressure As TemperatureHumidityPressureData
-    <DataMember(Name:="気圧")>
-    Public Property Pressure As PressureData
-    <DataMember(Name:="電池")>
-    Public Property Battery As Integer
-    <DataMember(Name:="距離")>
-    Public Property Distance As Integer
-End Class
