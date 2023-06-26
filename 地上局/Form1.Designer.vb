@@ -31,6 +31,9 @@ Partial Class Form1
         Dim ChartArea3 As DataVisualization.Charting.ChartArea = New DataVisualization.Charting.ChartArea()
         Dim Legend3 As DataVisualization.Charting.Legend = New DataVisualization.Charting.Legend()
         Dim Series3 As DataVisualization.Charting.Series = New DataVisualization.Charting.Series()
+        Dim ChartArea4 As DataVisualization.Charting.ChartArea = New DataVisualization.Charting.ChartArea()
+        Dim Legend4 As DataVisualization.Charting.Legend = New DataVisualization.Charting.Legend()
+        Dim Series4 As DataVisualization.Charting.Series = New DataVisualization.Charting.Series()
         PictureBox1 = New PictureBox()
         Label1 = New Label()
         TextBox1 = New TextBox()
@@ -41,6 +44,7 @@ Partial Class Form1
         Chart1 = New DataVisualization.Charting.Chart()
         Chart2 = New DataVisualization.Charting.Chart()
         Chart3 = New DataVisualization.Charting.Chart()
+        Chart4 = New DataVisualization.Charting.Chart()
         Button1 = New Button()
         CType(PictureBox1, ComponentModel.ISupportInitialize).BeginInit()
         CType(PictureBox2, ComponentModel.ISupportInitialize).BeginInit()
@@ -48,6 +52,7 @@ Partial Class Form1
         CType(Chart1, ComponentModel.ISupportInitialize).BeginInit()
         CType(Chart2, ComponentModel.ISupportInitialize).BeginInit()
         CType(Chart3, ComponentModel.ISupportInitialize).BeginInit()
+        CType(Chart4, ComponentModel.ISupportInitialize).BeginInit()
         SuspendLayout()
         ' 
         ' PictureBox1
@@ -113,13 +118,12 @@ Partial Class Form1
         Chart1.ChartAreas.Add(ChartArea1)
         Legend1.Name = "Legend1"
         Chart1.Legends.Add(Legend1)
-        Chart1.Location = New Point(665, 25)
+        Chart1.Location = New Point(996, 190)
         Chart1.Margin = New Padding(3, 2, 3, 2)
         Chart1.Name = "Chart1"
         Series1.ChartArea = "ChartArea1"
-        Series1.ChartType = DataVisualization.Charting.SeriesChartType.Line
         Series1.Legend = "Legend1"
-        Series1.Name = "Temperature"
+        Series1.Name = "Series1"
         Chart1.Series.Add(Series1)
         Chart1.Size = New Size(325, 157)
         Chart1.TabIndex = 9
@@ -135,9 +139,8 @@ Partial Class Form1
         Chart2.Margin = New Padding(3, 2, 3, 2)
         Chart2.Name = "Chart2"
         Series2.ChartArea = "ChartArea1"
-        Series2.ChartType = DataVisualization.Charting.SeriesChartType.Line
         Series2.Legend = "Legend1"
-        Series2.Name = "Humidity"
+        Series2.Name = "Series1"
         Chart2.Series.Add(Series2)
         Chart2.Size = New Size(325, 157)
         Chart2.TabIndex = 10
@@ -153,17 +156,33 @@ Partial Class Form1
         Chart3.Margin = New Padding(3, 2, 3, 2)
         Chart3.Name = "Chart3"
         Series3.ChartArea = "ChartArea1"
-        Series3.ChartType = DataVisualization.Charting.SeriesChartType.Line
         Series3.Legend = "Legend1"
-        Series3.Name = "Pressure"
+        Series3.Name = "Series1"
         Chart3.Series.Add(Series3)
         Chart3.Size = New Size(325, 157)
         Chart3.TabIndex = 11
         Chart3.Text = "Chart3"
         ' 
+        ' Chart4
+        ' 
+        ChartArea4.Name = "ChartArea1"
+        Chart4.ChartAreas.Add(ChartArea4)
+        Legend4.Name = "Legend1"
+        Chart4.Legends.Add(Legend4)
+        Chart4.Location = New Point(996, 351)
+        Chart4.Margin = New Padding(3, 2, 3, 2)
+        Chart4.Name = "Chart4"
+        Series4.ChartArea = "ChartArea1"
+        Series4.Legend = "Legend1"
+        Series4.Name = "Series1"
+        Chart4.Series.Add(Series4)
+        Chart4.Size = New Size(325, 157)
+        Chart4.TabIndex = 12
+        Chart4.Text = "Chart4"
+        ' 
         ' Button1
         ' 
-        Button1.Location = New Point(996, 12)
+        Button1.Location = New Point(1198, 7)
         Button1.Name = "Button1"
         Button1.Size = New Size(75, 23)
         Button1.TabIndex = 13
@@ -174,8 +193,9 @@ Partial Class Form1
         ' 
         AutoScaleDimensions = New SizeF(7F, 15F)
         AutoScaleMode = AutoScaleMode.Font
-        ClientSize = New Size(1074, 550)
+        ClientSize = New Size(1462, 550)
         Controls.Add(Button1)
+        Controls.Add(Chart4)
         Controls.Add(Chart3)
         Controls.Add(Chart2)
         Controls.Add(Chart1)
@@ -194,6 +214,7 @@ Partial Class Form1
         CType(Chart1, ComponentModel.ISupportInitialize).EndInit()
         CType(Chart2, ComponentModel.ISupportInitialize).EndInit()
         CType(Chart3, ComponentModel.ISupportInitialize).EndInit()
+        CType(Chart4, ComponentModel.ISupportInitialize).EndInit()
         ResumeLayout(False)
         PerformLayout()
     End Sub
@@ -208,5 +229,6 @@ Partial Class Form1
     Friend WithEvents Chart1 As DataVisualization.Charting.Chart
     Friend WithEvents Chart2 As DataVisualization.Charting.Chart
     Friend WithEvents Chart3 As DataVisualization.Charting.Chart
+    Friend WithEvents Chart4 As DataVisualization.Charting.Chart
     Friend WithEvents Button1 As Button
 End Class
