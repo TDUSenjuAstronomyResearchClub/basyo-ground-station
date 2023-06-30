@@ -2,6 +2,7 @@
 Imports System.IO.Ports
 Imports System.Runtime.Serialization
 Imports System.Runtime.Serialization.Json
+Imports Newtonsoft.Json
 Imports System.Text
 Imports System.Windows.Forms.VisualStyles.VisualStyleElement
 
@@ -30,18 +31,18 @@ Public Class Form1
         'Chart1の設定
         Dim aw As String
         aw = 300
-        Chart1.Series("Series1").Points.AddY(aw)
-        Chart1.Series("Series1").IsValueShownAsLabel = False
+        Chart1.Series("Temperature").Points.AddY(aw)
+        Chart1.Series("Temperature").IsValueShownAsLabel = False
         Chart1.ChartAreas("ChartArea1").AxisX.Enabled = DataVisualization.Charting.AxisEnabled.False
 
         'Chart2の設定
-        Chart2.Series("Series1").Points.AddY(aw)
-        Chart2.Series("Series1").IsValueShownAsLabel = False
+        Chart2.Series("Humidity").Points.AddY(aw)
+        Chart2.Series("Humidity").IsValueShownAsLabel = False
         Chart2.ChartAreas("ChartArea1").AxisX.Enabled = DataVisualization.Charting.AxisEnabled.False
 
         'Chart3の設定
-        Chart3.Series("Series1").Points.AddY(aw)
-        Chart3.Series("Series1").IsValueShownAsLabel = False
+        Chart3.Series("Pressure").Points.AddY(aw)
+        Chart3.Series("Pressure").IsValueShownAsLabel = False
         Chart3.ChartAreas("ChartArea1").AxisX.Enabled = DataVisualization.Charting.AxisEnabled.False
 
         Dim jsonSerializer As New DataContractJsonSerializer(GetType(SensorData))
@@ -170,11 +171,11 @@ End Class
 <DataContract>
 Public Class TemperatureHumidityPressureData
     <DataMember(Name:="温度")>
-    Public Property Temperature As Integer
+    Public Property Temperature As Single
     <DataMember(Name:="湿度")>
-    Public Property Humidity As Integer
+    Public Property Humidity As Single
     <DataMember(Name:="気圧")>
-    Public Property Pressure As Integer
+    Public Property Pressure As Single
 End Class
 
 <DataContract>
