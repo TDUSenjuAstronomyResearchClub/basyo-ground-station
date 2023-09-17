@@ -1,5 +1,5 @@
 {
-    "data_type": String(格納される文字列:"only_sensor_data" or "only_camera_data" or "only_soil_data" or "only_message_data"),
+    "data_type": String(格納される文字列:"only_sensor_data" or "only_picture_data" or "only_soil_data" or "only_message_data"),
     "time":float,
     "gps": {
         "latitude": float,
