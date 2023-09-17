@@ -120,13 +120,13 @@ class App(tk.Tk):
         self.pressure_label = tk.Label(self.scrollable_lframe, text="Pressure:", font=("Arial", 11))
         self.pressure_label.pack(anchor='nw',pady=10)
 
-        self.Lps25Hb_temperature_label = tk.Label(self.scrollable_lframe, text="Pressure Temperature:", font=("Arial", 11))
+        self.Lps25Hb_temperature_label = tk.Label(self.scrollable_lframe, text="Lps25Hb Temperature:", font=("Arial", 11))
         self.Lps25Hb_temperature_label.pack(anchor='nw',pady=10)
 
-        self.Lps25Hb_pressure_label = tk.Label(self.scrollable_lframe, text="Pressure Altitude:", font=("Arial", 11))
+        self.Lps25Hb_pressure_label = tk.Label(self.scrollable_lframe, text="Lps25Hb Altitude:", font=("Arial", 11))
         self.Lps25Hb_pressure_label.pack(anchor='nw',pady=10)
 
-        self.Lps25Hb_altitude_label = tk.Label(self.scrollable_lframe, text="Pressure Altitude:", font=("Arial", 11))
+        self.Lps25Hb_altitude_label = tk.Label(self.scrollable_lframe, text="Lps25Hb Altitude:", font=("Arial", 11))
         self.Lps25Hb_altitude_label.pack(anchor='nw',pady=10)
 
         self.battery_label = tk.Label(self.scrollable_lframe, text="Battery:", font=("Arial", 11))
@@ -257,10 +257,10 @@ class App(tk.Tk):
                 try:
                     data = self.serial_port.readline().decode('utf-8').strip()
                     #decoded_data = base64.b64decode(data).decode("utf-8")
-                    json_data = json.JSONDecoder(data)
+                    #json_data = json.JSONDecoder(data)
                     #decoded_data = ord(data)
                     #data= data.encode('utf-8')
-                    #json_data = json.loads(decoder)
+                    json_data = json.loads(data)
                     self.update_data(json_data)
                     self.save_to_excel(json_data)
 
@@ -300,9 +300,9 @@ class App(tk.Tk):
         type = data.get("data_type")
         time = data.get("time")
         gps = data.get("gps")
-        nine_axis = data.get("nime_axis")
+        nine_axis = data.get("nine_axis")
         bme280 = data.get("bme280")
-        Lps25Hb = data.get("Lps25Hb")
+        lps25hb = data.get("lps25hb")
         battery = data.get("battery")
         distance = data.get("distance")
 
@@ -326,9 +326,9 @@ class App(tk.Tk):
             self.temperature_label.configure(text=f"Temperature: {bme280['temperature']}")
             self.humidity_label.configure(text=f"Humidity: {bme280['humidity']}")
             self.pressure_label.configure(text=f"Pressure: {bme280['pressure']}")
-            self.Lps25Hb_temperature_label.configure(text=f"Lps25Hb Temperature: {Lps25Hb['temperature']}")
-            self.Lps25Hb_altitude_label.configure(text=f"Lps25Hb Altitude: {Lps25Hb['altitude']}")
-            self.Lps25Hb_pressure_label.configure(text=f"Lps25Hb Pressure: {Lps25Hb['pressure']}")
+            self.Lps25Hb_temperature_label.configure(text=f"Lps25Hb Temperature: {lps25hb['temperature']}")
+            self.Lps25Hb_pressure_label.configure(text=f"Lps25Hb Pressure: {lps25hb['pressure']}")
+            self.Lps25Hb_altitude_label.configure(text=f"Lps25Hb Altitude: {lps25hb['altitude']}")
             self.battery_label.configure(text=f"Battery: {battery}")
             self.distance_label.configure(text=f"Distance: {distance}")
 
