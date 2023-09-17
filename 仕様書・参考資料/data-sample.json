@@ -1,45 +1,45 @@
 {
-    "data_type": 1,
-    "time":1,
+    "data_type": String(格納される文字列:"only_sensor_data" or "only_camera_data" or "only_soil_data" or "only_message_data"),
+    "time":float,
     "gps": {
-        "latitude": 1,
-        "longitude": 2,
-        "altitude": 3,
+        "latitude": float,
+        "longitude": float,
+        "altitude": float,
         "distance": {
-            "sample": 1,
-            "goal": 2
+            "sample": float,
+            "goal": float
         },
         "azimuth": {
-            "sample": 1,
-            "goal": 2
+            "sample": float,
+            "goal": float
         }
     },
     "nine_axis": {
         "acceleration": {
-            "x": 1,
-            "y": 2,
-            "z": 3
+            "x": float,
+            "y": float,
+            "z": float
         },
         "angular_velocity": {
-            "x": 1,
-            "y": 2,
-            "z": 3
+            "x": float,
+            "y": float,
+            "z": float
         },
-        "azimuth": 1
+        "azimuth": float
     },
     "bme280": {
-        "temperature": 1,
-        "humidity": 2,
-        "pressure": 3
+        "temperature": float,
+        "humidity": float,
+        "pressure": float
     },
     "Lps25Hb": {
-        "temperature": 1,
-        "pressure": 2,
-        "altitude": 3
+        "temperature": float,
+        "pressure": float,
+        "altitude": float
     },
-    "battery": 1,
-    "distance": 1,
-    "camera": 1,
-    "soil_moisture": 1,
-    "message": 1
+    "battery": float,
+    "distance": float,
+    "camera": String,
+    "soil_moisture": float,
+    "message": String(16進数)
 }
