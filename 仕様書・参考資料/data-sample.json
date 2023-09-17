@@ -32,7 +32,7 @@
         "humidity": float,
         "pressure": float
     },
-    "Lps25Hb": {
+    "lps25hb": {
         "temperature": float,
         "pressure": float,
         "altitude": float
