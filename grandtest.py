@@ -16,13 +16,10 @@ from datetime import datetime
 import pandas as pd
 import time as t
 
+# comportを確認し適時変更する
+port = "COM7"
 
-
-#comportを確認し適時変更する
-port="COM7"
-
-comand="コマンド一覧\ndestination: サンプル採取地点または\nゴール地点の緯度、経度の変更\nfall:機体の落下開始判定\nlanding:機体の着地判定\n//manual:手動制御\n***以降manualで使用***\npicture:写真撮影\nsoil_moisture:土壌水分測定\nsample:サンプル採取\nw:前進\na:左旋回\nd:右旋回\ns:後退" 
-
+comand = "コマンド一覧\ndestination: サンプル採取地点または\nゴール地点の緯度、経度の変更\nfall:機体の落下開始判定\nlanding:機体の着地判定\n//manual:手動制御\n***以降manualで使用***\npicture:写真撮影\nsoil_moisture:土壌水分測定\nsample:サンプル採取\nw:前進\na:左旋回\nd:右旋回\ns:後退"
 
 
 class App(tk.Tk):
@@ -31,33 +28,30 @@ class App(tk.Tk):
 
         self.title("Serial Communication")
 
-        #通信ボタン
+        # 通信ボタン
         self.button = tk.Button(self, text="Start Communication", command=self.toggle_communication)
-        self.button.pack(anchor='ne',padx=10, pady=10)
+        self.button.pack(anchor='ne', padx=10, pady=10)
         self.serial_port = None
         self.is_serial_connected = False
         self.after(100, self.read_serial_data)  # シリアルデータの読み込みを開始
 
-
-        #tab
+        # tab
         self.notebook = ttk.Notebook(self)
-        tab1 = Frame(self)  #main用
-        tab2 = Frame(self)  #graph用
-        tab3 =Frame(self)   #map用
-        self.notebook.add(tab1,text="main")
-        self.notebook.add(tab2,text="graph")
+        tab1 = Frame(self)  # main用
+        tab2 = Frame(self)  # graph用
+        tab3 = Frame(self)  # map用
+        self.notebook.add(tab1, text="main")
         self.notebook.add(tab2, text="graph")
-        self.notebook.pack(expand=True,fill="both")
-        
+        self.notebook.add(tab2, text="graph")
+        self.notebook.pack(expand=True, fill="both")
 
-        #右側コマンド系frame
+        # 右側コマンド系frame
         self.right = tk.Canvas(tab1, width=280, height=200, borderwidth=0, highlightthickness=0)
         self.command_frame = tk.Frame(self.right)
         self.right.pack(side=tk.RIGHT, fill=tk.BOTH)
         self.right.create_window((0, 0), window=self.command_frame, anchor=tk.NW)
 
-
-        #左側データ表示用frame
+        # 左側データ表示用frame
         self.canvasleft = tk.Canvas(tab1, width=400, height=200, borderwidth=0, highlightthickness=0)
         self.scrollable_lframe = tk.Frame(self.canvasleft)
 
@@ -70,61 +64,65 @@ class App(tk.Tk):
 
         self.scrollable_lframe.bind("<Configure>", self.on_frame_configure)
 
-
-        #データ表示用
+        # データ表示用
         self.time_label = tk.Label(self.scrollable_lframe, text="Time:      ", font=("Arial", 11))
-        self.time_label.pack(anchor='nw',pady=10)
+        self.time_label.pack(anchor='nw', pady=10)
 
         self.latitude_label = tk.Label(self.scrollable_lframe, text="Latitude:      ", font=("Arial", 11))
-        self.latitude_label.pack(anchor='nw',pady=10)
+        self.latitude_label.pack(anchor='nw', pady=10)
 
         self.longitude_label = tk.Label(self.scrollable_lframe, text="Longitude:        ", font=("Arial", 11))
-        self.longitude_label.pack(anchor='nw',pady=10)
+        self.longitude_label.pack(anchor='nw', pady=10)
 
         self.altitude_label = tk.Label(self.scrollable_lframe, text="Altitude:      ", font=("Arial", 11))
-        self.altitude_label.pack(anchor='nw',pady=10)
+        self.altitude_label.pack(anchor='nw', pady=10)
 
-        self.sample_distance_label = tk.Label(self.scrollable_lframe, text="Sample Distance:        ", font=("Arial", 11))
-        self.sample_distance_label.pack(anchor='nw',pady=10)
+        self.sample_distance_label = tk.Label(self.scrollable_lframe, text="Sample Distance:        ",
+                                              font=("Arial", 11))
+        self.sample_distance_label.pack(anchor='nw', pady=10)
 
         self.sample_azimuth_label = tk.Label(self.scrollable_lframe, text="Sample Azimuth:      ", font=("Arial", 11))
-        self.sample_azimuth_label.pack(anchor='nw',pady=10)
+        self.sample_azimuth_label.pack(anchor='nw', pady=10)
 
         self.goal_distance_label = tk.Label(self.scrollable_lframe, text="Goal Distance:        ", font=("Arial", 11))
-        self.goal_distance_label.pack(anchor='nw',pady=10)
+        self.goal_distance_label.pack(anchor='nw', pady=10)
 
         self.goal_azimuth_label = tk.Label(self.scrollable_lframe, text="Goal Azimuth:      ", font=("Arial", 11))
-        self.goal_azimuth_label.pack(anchor='nw',pady=10)
+        self.goal_azimuth_label.pack(anchor='nw', pady=10)
 
         self.acceleration_x_label = tk.Label(self.scrollable_lframe, text="Acceleration X:      ", font=("Arial", 11))
-        self.acceleration_x_label.pack(anchor='nw',pady=10)
+        self.acceleration_x_label.pack(anchor='nw', pady=10)
 
         self.acceleration_y_label = tk.Label(self.scrollable_lframe, text="Acceleration Y:      ", font=("Arial", 11))
-        self.acceleration_y_label.pack(anchor='nw',pady=10)
+        self.acceleration_y_label.pack(anchor='nw', pady=10)
 
         self.acceleration_z_label = tk.Label(self.scrollable_lframe, text="Acceleration Z:      ", font=("Arial", 11))
-        self.acceleration_z_label.pack(anchor='nw',pady=10)
+        self.acceleration_z_label.pack(anchor='nw', pady=10)
 
-        self.angular_velocity_x_label = tk.Label(self.scrollable_lframe, text="Angular Velocity X:      ", font=("Arial", 11))
-        self.angular_velocity_x_label.pack(anchor='nw',pady=10)
+        self.angular_velocity_x_label = tk.Label(self.scrollable_lframe, text="Angular Velocity X:      ",
+                                                 font=("Arial", 11))
+        self.angular_velocity_x_label.pack(anchor='nw', pady=10)
 
-        self.angular_velocity_y_label = tk.Label(self.scrollable_lframe, text="Angular Velocity Y:      ", font=("Arial", 11))
-        self.angular_velocity_y_label.pack(anchor='nw',pady=10)
+        self.angular_velocity_y_label = tk.Label(self.scrollable_lframe, text="Angular Velocity Y:      ",
+                                                 font=("Arial", 11))
+        self.angular_velocity_y_label.pack(anchor='nw', pady=10)
 
-        self.angular_velocity_z_label = tk.Label(self.scrollable_lframe, text="Angular Velocity Z:      ", font=("Arial", 11))
-        self.angular_velocity_z_label.pack(anchor='nw',pady=10)
+        self.angular_velocity_z_label = tk.Label(self.scrollable_lframe, text="Angular Velocity Z:      ",
+                                                 font=("Arial", 11))
+        self.angular_velocity_z_label.pack(anchor='nw', pady=10)
 
-        self.nine_axis_azimuth_label = tk.Label(self.scrollable_lframe, text="Nine Axis Azimuth:        ", font=("Arial", 11))
-        self.angular_velocity_z_label.pack(anchor='nw',pady=10)
+        self.nine_axis_azimuth_label = tk.Label(self.scrollable_lframe, text="Nine Axis Azimuth:        ",
+                                                font=("Arial", 11))
+        self.angular_velocity_z_label.pack(anchor='nw', pady=10)
 
         self.temperature_label = tk.Label(self.scrollable_lframe, text="Temperature:        ", font=("Arial", 11))
-        self.temperature_label.pack(anchor='nw',pady=10)
+        self.temperature_label.pack(anchor='nw', pady=10)
 
         self.humidity_label = tk.Label(self.scrollable_lframe, text="Humidity:      ", font=("Arial", 11))
-        self.humidity_label.pack(anchor='nw',pady=10)
+        self.humidity_label.pack(anchor='nw', pady=10)
 
         self.pressure_label = tk.Label(self.scrollable_lframe, text="Pressure:      ", font=("Arial", 11))
-        self.pressure_label.pack(anchor='nw',pady=10)
+        self.pressure_label.pack(anchor='nw', pady=10)
 
         self.battery_label = tk.Label(self.scrollable_lframe, text="Battery:        ", font=("Arial", 11))
         self.battery_label.pack(anchor='nw', pady=10)
@@ -135,26 +133,25 @@ class App(tk.Tk):
         self.soil_label = tk.Label(self.scrollable_lframe, text="soil:      ", font=("Arial", 11))
         self.soil_label.pack(anchor='nw', pady=10)
 
-
-        #command送信用
+        # command送信用
         self.sendframe = tk.Frame(self.command_frame)
         self.sendframe.pack(anchor='ne')
 
         self.send_button = tk.Button(self.sendframe, text="Send Data", command=self.send_data)
-        self.send_button.pack(side='right',pady=10,expand=True)
-        self.entry= tk.Entry(self.sendframe)
-        self.entry.pack(side='right',pady=10,expand=True)
+        self.send_button.pack(side='right', pady=10, expand=True)
+        self.entry = tk.Entry(self.sendframe)
+        self.entry.pack(side='right', pady=10, expand=True)
 
         self.comand_label = tk.Label(self.command_frame, text=comand, font=("Arial", 10))
         self.comand_label.pack(pady=10)
 
         self.data_text = tk.Entry(self.command_frame, width=40)
         self.data_text.pack(ipady=10, pady=10, expand=True)
-        
 
-        #グラフ
-        self.graphframe= tk.Frame(tab2, width=1000, height=800, borderwidth=0, highlightthickness=0)
-        fig, (self.acx, self.acy, self.acz, self.avx, self.avy, self.avz, self.tem, self.hum, self.pre, self.dis) = plt.subplots(10, 1, sharex=True)
+        # グラフ
+        self.graphframe = tk.Frame(tab2, width=1000, height=800, borderwidth=0, highlightthickness=0)
+        fig, (self.acx, self.acy, self.acz, self.avx, self.avy, self.avz, self.tem, self.hum, self.pre,
+              self.dis) = plt.subplots(10, 1, sharex=True)
         plt.xlabel('Time')
         self.acx.set_ylabel("Acc X")
         self.acy.set_ylabel("Acc Y")
@@ -204,18 +201,17 @@ class App(tk.Tk):
         self.dis.set_ylabel("Distance")
         """
 
-        self.fig_canvas=FigureCanvasTkAgg(fig, self.graphframe)
-        self.fig_canvas.get_tk_widget().pack(anchor='center',fill=tk.BOTH, expand=True)
+        self.fig_canvas = FigureCanvasTkAgg(fig, self.graphframe)
+        self.fig_canvas.get_tk_widget().pack(anchor='center', fill=tk.BOTH, expand=True)
         self.graphframe.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         self.graphframe.bind("<Configure>", self.on_frame_configure)
-        #fig.tight_layout()
+        # fig.tight_layout()
 
-
-        #地図写真用frame
+        # 地図写真用frame
         self.center = tk.Frame(tab1)
         self.center.pack(side=tk.TOP, fill=tk.BOTH)
 
-        #写真用キャンバス
+        # 写真用キャンバス
         self.cvs = tk.Canvas(self.center, width=1000, height=500)
         self.cvs.pack(expand=True)
 
@@ -239,12 +235,11 @@ class App(tk.Tk):
         self.coordinates = []
         self.battery_data = []
         self.distance_data = []
-    
-    
+
     def on_frame_configure(self, event):
         self.canvasleft.configure(scrollregion=self.canvasleft.bbox("all"))
-    
-    #通信処理関数
+
+    # 通信処理関数
     def toggle_communication(self):
         if not self.is_serial_connected:
             try:
@@ -259,8 +254,7 @@ class App(tk.Tk):
             self.serial_port.close()
             self.button.configure(text="Start Communication")
 
-
-    #シリアル通信動作関数
+    # シリアル通信動作関数
     def read_serial_data(self):
         def read_data():
             self.filename()
@@ -270,14 +264,13 @@ class App(tk.Tk):
                     json_data = json.loads(data)
                     self.save_to_excel(json_data)
                     self.update_data(json_data)
-                    
+
                 except Exception as e:
                     print(str(e))
-                    
+
         Thread(target=read_data, daemon=True).start()
 
-
-    #コマンド送信関数
+    # コマンド送信関数
     def send_data(self):
         if self.is_serial_connected:
             try:
@@ -290,8 +283,7 @@ class App(tk.Tk):
         else:
             messagebox.showerror("Error", "Serial connection is not established.")
 
-
-    #定期通信用データ更新関数
+    # 定期通信用データ更新関数
     def update_data(self, data):
         type = data.get("data_type")
         if type == "only_sensor_data":
@@ -302,19 +294,19 @@ class App(tk.Tk):
             self.picture_data(data)
         elif type == "only_soil_data":
             self.soil_data(data)
-        else: pass
+        else:
+            pass
 
-        
-    #センサデータ表示処理
-    def sensor_data(self,data):
+    # センサデータ表示処理
+    def sensor_data(self, data):
         time = data.get("time")
         gps = data.get("gps")
         nine_axis = data.get("nine_axis")
         bme280 = data.get("bme280")
         battery = data.get("battery")
         distance = data.get("distance")
-        
-        #データ表示
+
+        # データ表示
         self.time_label.configure(text=f"Time: {time}")
         self.latitude_label.configure(text=f"Latitude: {gps['latitude']}")
         self.longitude_label.configure(text=f"Longitude: {gps['longitude']}")
@@ -381,12 +373,11 @@ class App(tk.Tk):
         self.hum.plot(self.time_data, self.Humidity_data)
         self.pre.clear()
         self.pre.plot(self.time_data, self.Pressure_data)
-        #self.bat.clear()
-        #self.bat.plot(self.time_data, self.battery_data)
+        # self.bat.clear()
+        # self.bat.plot(self.time_data, self.battery_data)
         self.dis.clear()
         self.dis.plot(self.time_data, self.distance_data)
         self.fig_canvas.draw()
-
 
         # 地図表示処理
         # フレームをクリア
@@ -418,54 +409,46 @@ class App(tk.Tk):
         img = PhotoImage(file='map.png')
         self.map_frame.create_image(0, 0, image=img)
 
-
-    #メッセージ処理
-    def text_data(self,data):
+    # メッセージ処理
+    def text_data(self, data):
         time = data.get("time")
         message = data.get("message")
         self.data_text.insert(text=f"Time: {time}")
         self.data_text.insert(text=f"message: {message}")
 
-
-    #Excelファイル名を生成
+    # Excelファイル名を生成
     def filename(self):
         now = datetime.now()
         self.excel_file_name = "start_" + now.strftime("%Y-%m-%d_%H-%M-%S") + ".xlsx"
 
-
-    #データ保存処理
-    def save_to_excel(self,data):
+    # データ保存処理
+    def save_to_excel(self, data):
         df = pd.DataFrame(data)
         df.to_excel(self.excel_file_name, index=False)
 
-
-    
-    #写真処理
-    def picture_data(self,data):
+    # 写真処理
+    def picture_data(self, data):
         picture = data.get("camera")
         img_stream = io.BytesIO(picture)
         img = Image.open(img_stream)
         img = img.resize((200, 150))
         photo = ImageTk.PhotoImage(img)
-        self.cvs.create_image(200,150,image=photo,tag="mytest")
+        self.cvs.create_image(200, 150, image=photo, tag="mytest")
         self.cvs.image = photo
 
-
-    #土壌水分データ処理
-    def soil_data(self,data):
+    # 土壌水分データ処理
+    def soil_data(self, data):
         soil = data.get("soil_moisture")
         self.soil_label.configure(text=f"soil: {soil}")
 
-
-    #終了処理
+    # 終了処理
     def close(self):
         self.is_serial_connected = False
         if self.serial_port:
             self.serial_port.close()
         self.destroy()
-    
 
-    #スクロールバー
+    # スクロールバー
     class ScrollableFrame(tk.Frame):
         def __init__(self, parent, *args, **kwargs):
             super().__init__(parent, *args, **kwargs)
