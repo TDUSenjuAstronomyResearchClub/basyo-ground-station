@@ -18,10 +18,12 @@ from datetime import datetime
 import pandas as pd
 import time as t
 
-# -----comportを確認し適時変更する-----
+# -----COMportを確認し適時変更する-----
 port = "COM7"
 
-comand = "コマンド一覧\ndestination: サンプル採取地点または\nゴール地点の緯度、経度の変更\nfall:機体の落下開始判定\nlanding:機体の着地判定\n//manual:手動制御\n***以降manualで使用***\npicture:写真撮影\nsoil_moisture:土壌水分測定\nsample:サンプル採取\nw:前進\na:左旋回\nd:右旋回\ns:後退"
+comand = ("コマンド一覧\ndestination: サンプル採取地点または\nゴール地点の緯度、経度の変更\nfall:機体の落下開始判定\n"
+          "landing:機体の着地判定\n//manual:手動制御\n***以降manualで使用***\npicture:写真撮影\nsoil_moisture:土壌水分測定\n"
+          "sample:サンプル採取\nw:前進\na:左旋回\nd:右旋回\ns:後退")
 
 
 class App(tk.Tk):
