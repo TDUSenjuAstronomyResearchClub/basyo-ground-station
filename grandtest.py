@@ -220,7 +220,7 @@ class App(tk.Tk):
         self.cvs.pack(expand=True)
 
         # 地図表示用のフレーム
-        self.map_frame = tk.Canvas(self.center, width=1000, height=500)
+        self.map_frame = tk.Canvas(self.center, width=800, height=600)
         self.map_frame.pack(expand=True)
 
         self.protocol("WM_DELETE_WINDOW", self.close)
@@ -309,6 +309,7 @@ class App(tk.Tk):
         bme280 = data.get("bme280")
         battery = data.get("battery")
         distance = data.get("distance")
+        lps25hb = data.get("lps25hb")
 
         # データ表示
         self.time_label.configure(text=f"Time: {time}")
@@ -411,7 +412,7 @@ class App(tk.Tk):
             widget.destroy()
         # 地図表示処理
         img = PhotoImage(file='map.png')
-        self.map_frame.create_image(0, 0, image=img)
+        self.map_frame.create_image(10, 10, image=img)
 
     # -----メッセージ処理-----
     def text_data(self, data):
