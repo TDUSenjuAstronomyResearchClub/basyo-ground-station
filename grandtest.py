@@ -18,7 +18,7 @@ from datetime import datetime
 import pandas as pd
 import time as t
 
-# -----COMportを確認し適時変更する-----
+"""COMportを確認し適時変更する"""
 port = "COM7"
 
 comand = ("コマンド一覧\ndestination: サンプル採取地点または\nゴール地点の緯度、経度の変更\nfall:機体の落下開始判定\n"
@@ -216,11 +216,11 @@ class App(tk.Tk):
         self.center.pack(side=tk.TOP, fill=tk.BOTH)
 
         # 写真用キャンバス
-        self.cvs = tk.Canvas(self.center, width=1000, height=500)
-        self.cvs.pack(expand=True)
+        #self.cvs = tk.Canvas(self.center, width=500, height=200)
+        #self.cvs.pack(expand=True)
 
         # 地図表示用のフレーム
-        self.map_frame = tk.Canvas(self.center, width=800, height=600)
+        self.map_frame = tk.Canvas(self.center, width=700, height=500)
         self.map_frame.pack(expand=True)
 
         self.protocol("WM_DELETE_WINDOW", self.close)
@@ -243,7 +243,7 @@ class App(tk.Tk):
     def on_frame_configure(self, event):
         self.canvasleft.configure(scrollregion=self.canvasleft.bbox("all"))
 
-    # -----通信処理関数-----
+    """通信処理関数"""
     def toggle_communication(self):
         if not self.is_serial_connected:
             try:
@@ -258,7 +258,7 @@ class App(tk.Tk):
             self.serial_port.close()
             self.button.configure(text="Start Communication")
 
-    # -----シリアル通信動作関数-----
+    """シリアル通信動作関数"""
     def read_serial_data(self):
         def read_data():
             self.filename()
@@ -269,12 +269,13 @@ class App(tk.Tk):
                     self.save_to_excel(json_data)
                     self.update_data(json_data)
 
+
                 except Exception as e:
                     print(str(e))
 
         Thread(target=read_data, daemon=True).start()
 
-    # -----コマンド送信関数-----
+    """ コマンド送信関数 """
     def send_data(self):
         if self.is_serial_connected:
             try:
@@ -287,8 +288,10 @@ class App(tk.Tk):
         else:
             messagebox.showerror("Error", "Serial connection is not established.")
 
-    # -----定期通信用データ更新関数-----
+    """ 定期通信用データ更新関数 """
     def update_data(self, data):
+        img = PhotoImage(file='map.png')
+        self.map_frame.create_image(0, 0, anchor='nw', image=img)
         type = data.get("data_type")
         if type == "only_sensor_data":
             self.sensor_data(data)
@@ -301,7 +304,7 @@ class App(tk.Tk):
         else:
             pass
 
-    # -----センサデータ表示処理-----
+    """センサデータ表示処理"""
     def sensor_data(self, data):
         time = data.get("time")
         gps = data.get("gps")
@@ -402,36 +405,29 @@ class App(tk.Tk):
         wait = WebDriverWait(driver=browser, timeout=10)
         tmpurl = 'file://{path}/{mapfile}'.format(path=os.getcwd(), mapfile=map_file)
         browser.get(tmpurl)
-        #t.sleep(5)
         wait.until(EC.presence_of_all_elements_located)
         browser.save_screenshot("map.png")
         browser.close()
         browser.quit()
-        # フレームをクリア
-        for widget in self.map_frame.winfo_children():
-            widget.destroy()
-        # 地図表示処理
-        img = PhotoImage(file='map.png')
-        self.map_frame.create_image(10, 10, image=img)
 
-    # -----メッセージ処理-----
+    """メッセージ処理"""
     def text_data(self, data):
         time = data.get("time")
         message = data.get("message")
         self.data_text.insert(text=f"Time: {time}")
         self.data_text.insert(text=f"message: {message}")
 
-    # -----Excelファイル名を生成-----
+    """Excelファイル名を生成"""
     def filename(self):
         now = datetime.now()
         self.excel_file_name = "start_" + now.strftime("%Y-%m-%d_%H-%M-%S") + ".xlsx"
 
-    # -----データ保存処理-----
+    """データ保存処理"""
     def save_to_excel(self, data):
-        df = pd.DataFrame(data)
+        """df = pd.DataFrame(data)
         df.to_excel(self.excel_file_name, index=False)
-
-    # -----写真処理-----
+        """
+    """写真処理"""
     def picture_data(self, data):
         picture = data.get("camera")
         img_stream = io.BytesIO(picture)
@@ -441,19 +437,19 @@ class App(tk.Tk):
         self.cvs.create_image(200, 150, image=photo, tag="mytest")
         self.cvs.image = photo
 
-    # -----土壌水分データ処理-----
+    """土壌水分データ処理"""
     def soil_data(self, data):
         soil = data.get("soil_moisture")
         self.soil_label.configure(text=f"soil: {soil}")
 
-    # -----終了処理-----
+    """終了処理"""
     def close(self):
         self.is_serial_connected = False
         if self.serial_port:
             self.serial_port.close()
         self.destroy()
 
-    # スクロールバー
+    """スクロールバー"""
     class ScrollableFrame(tk.Frame):
         def __init__(self, parent, *args, **kwargs):
             super().__init__(parent, *args, **kwargs)
