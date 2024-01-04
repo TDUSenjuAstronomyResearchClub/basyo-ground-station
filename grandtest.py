@@ -472,12 +472,13 @@ class App(tk.Tk):
     """データ保存処理"""
 
     def save_to_excel(self, data):
-        df = pd.read_excel(self.excel_file_name)
+        # df = pd.read_excel(self.excel_file_name)
+        df = pd.concat(pd.DataFrame(self.to_excel_dict(data)), ignore_index=False)
         print(df)
         # 保存
         with pd.ExcelWriter(self.excel_file_name, engine='openpyxl', mode='a', if_sheet_exists="overlay") as writer:
-            df = pd.concat([df, pd.DataFrame(self.to_excel_dict(data))], ignore_index=True)
             df.to_excel(writer, index=False)
+        writer.close()
 
         """
         sheet = self.workbook.active
