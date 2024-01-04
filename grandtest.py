@@ -43,7 +43,7 @@ class App(tk.Tk):
         self.notebook = ttk.Notebook(self)
         tab1 = Frame(self)  # main用
         tab2 = Frame(self)  # graph用
-        tab3 = Frame(self)  # map用
+        # tab3 = Frame(self)  # map用
         self.notebook.add(tab1, text="main")
         self.notebook.add(tab2, text="graph")
         self.notebook.add(tab2, text="graph")
@@ -297,14 +297,14 @@ class App(tk.Tk):
     def update_data(self, data):
         img = PhotoImage(file='map.png')
         self.map_frame.create_image(0, 0, anchor='nw', image=img)
-        type = data.get("data_type")
-        if type == "only_sensor_data":
+        data_type = data.get("data_type")
+        if data_type == "only_sensor_data":
             self.sensor_data(data)
-        elif type == "only_message_data":
+        elif data_type == "only_message_data":
             self.text_data(data)
-        elif type == "only_picture_data":
+        elif data_type == "only_picture_data":
             self.picture_data(data)
-        elif type == "only_soil_data":
+        elif data_type == "only_soil_data":
             self.soil_data(data)
         else:
             pass
@@ -318,7 +318,7 @@ class App(tk.Tk):
         bme280 = data.get("bme280")
         battery = data.get("battery")
         distance = data.get("distance")
-        lps25hb = data.get("lps25hb")
+        # lps25hb = data.get("lps25hb")
 
         # データ表示
         self.time_label.configure(text=f"Time: {time}")
@@ -556,8 +556,8 @@ class App(tk.Tk):
         img = Image.open(img_stream)
         img = img.resize((200, 150))
         photo = ImageTk.PhotoImage(img)
-        self.cvs.create_image(200, 150, image=photo, tag="mytest")
-        self.cvs.image = photo
+        # self.cvs.create_image(200, 150, image=photo, tag="mytest")
+        # self.cvs.image = photo
 
     """土壌水分データ処理"""
 
