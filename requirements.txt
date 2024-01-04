@@ -5,7 +5,6 @@ pandas==1.5.3
 Pillow==9.4.0
 pywebview==4.2.2
 selenium==4.15.2
-serial==0.0.97
 fastjsonschema==2.16.2
 imagecodecs==2021.8.26
 imageio==2.26.0

@@ -6,14 +6,14 @@
 地上局を使用する上でインストールが必要なライブラリを以下示す。
 ここに記述がないものは標準ライブラリとなっている。
 
-| name       | pip_install_--- |
-|------------|-----------------|
-| serial     | pyserial        |
-| matplotlib | matplotlib      |
-| folium     | folium          |
-| selenium   | selenium        |
-| PIL        | Pillow          |
-| pandas     | pandas          |
+| name        | pip_install_--- |
+|-------------|-----------------|
+| pyserial    | matplotlib      |
+| matplotlib  | folium          |
+| folium      | selenium        |
+| selenium    | PIL             |
+| Pillow      | pandas          | 
+| pandas      |                 |
 
 ## 実行方法と機能
 1. 使用するPCにXbeeを接続し、COMポートを確認する。
