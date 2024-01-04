@@ -367,8 +367,8 @@ class App(tk.Tk):
         Latitude = gps['latitude']
         Longitude = gps['longitude']
         self.coordinates.append((Latitude, Longitude))
-        self.battery_data.append((battery))
-        self.distance_data.append((distance))
+        self.battery_data.append(battery)
+        self.distance_data.append(distance)
 
         # グラフにデータをプロット
         self.acx.clear()
@@ -444,11 +444,37 @@ class App(tk.Tk):
         ])
         df.to_excel(self.excel_file_name, index=False)
 
+    """コラムと連動させる"""
+
+    def to_excel_dict(self, record):
+        return {
+            'gps.latitude': record['gps']['latitude'],
+            'gps.longitude': record['gps']['longitude'],
+            'gps.altitude': record['gps']['altitude'],
+            'gps.distance.sample': record['gps']['distance']['sample'],
+            'gps.distance.goal': record['gps']['distance']['goal'],
+            'gps.azimuth.sample': record['gps']['azimuth']['sample'],
+            'gps.azimuth.goal': record['gps']['azimuth']['goal'],
+            'nine_axis.acceleration.x': record['nine_axis']['acceleration']['x'],
+            'nine_axis.acceleration.y': record['nine_axis']['acceleration']['y'],
+            'nine_axis.acceleration.z': record['nine_axis']['acceleration']['z'],
+            'nine_axis.angular_velocity.x': record['nine_axis']['angular_velocity']['x'],
+            'nine_axis.angular_velocity.y': record['nine_axis']['angular_velocity']['y'],
+            'nine_axis.angular_velocity.z': record['nine_axis']['angular_velocity']['z'],
+            'nine_axis.azimuth': record['nine_axis']['azimuth'],
+            'bme280.temperature': record['bme280']['temperature'],
+            'bme280.humidity': record['bme280']['humidity'],
+            'bme280.pressure': record['bme280']['pressure'],
+            'lps25hb.temperature': record['lps25hb']['temperature'],
+            'lps25hb.pressure': record['lps25hb']['pressure'],
+            'bme280.altitude': record['bme280']['altitude']
+        }
+
     """データ保存処理"""
 
     def save_to_excel(self, data):
         df = pd.read_excel(self.excel_file_name)
-        df = pd.concat([df, pd.DataFrame([data])], ignore_index=True)
+        df = pd.concat([df, pd.DataFrame(self.to_excel_dict(data))], ignore_index=True)
         print(df)
 
         # 保存
