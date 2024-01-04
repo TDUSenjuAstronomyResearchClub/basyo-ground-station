@@ -155,7 +155,7 @@ class App(tk.Tk):
         # グラフ
         self.graphframe = tk.Frame(tab2, width=1000, height=800, borderwidth=0, highlightthickness=0)
         fig, (self.acx, self.acy, self.acz, self.avx, self.avy, self.avz, self.tem, self.hum, self.pre,
-              self.dis) = plt.subplots(10, 1, sharex=True)
+              self.dis) = plt.subplots(10, 1, sharex='all')
         plt.xlabel('Time')
         self.acx.set_ylabel("Acc X")
         self.acy.set_ylabel("Acc Y")
