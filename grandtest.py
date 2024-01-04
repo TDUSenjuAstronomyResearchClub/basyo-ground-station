@@ -17,7 +17,6 @@ import io
 import os
 from datetime import datetime
 import pandas as pd
-import time as t
 
 """COMportを確認し適時変更する"""
 port = "COM7"
