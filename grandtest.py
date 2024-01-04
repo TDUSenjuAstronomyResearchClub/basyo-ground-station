@@ -216,8 +216,8 @@ class App(tk.Tk):
         self.center.pack(side=tk.TOP, fill=tk.BOTH)
 
         # 写真用キャンバス
-        #self.cvs = tk.Canvas(self.center, width=500, height=200)
-        #self.cvs.pack(expand=True)
+        # self.cvs = tk.Canvas(self.center, width=500, height=200)
+        # self.cvs.pack(expand=True)
 
         # 地図表示用のフレーム
         self.map_frame = tk.Canvas(self.center, width=700, height=500)
@@ -225,7 +225,7 @@ class App(tk.Tk):
 
         self.protocol("WM_DELETE_WINDOW", self.close)
 
-        #excel処理用
+        # excel処理用
         self.workbook = Workbook()
 
         # データ
@@ -249,6 +249,7 @@ class App(tk.Tk):
         self.canvasleft.configure(scrollregion=self.canvasleft.bbox("all"))
 
     """通信処理関数"""
+
     def toggle_communication(self):
         if not self.is_serial_connected:
             try:
@@ -263,8 +264,8 @@ class App(tk.Tk):
             self.serial_port.close()
             self.button.configure(text="Start Communication")
 
-
     """シリアル通信動作関数"""
+
     def read_serial_data(self):
         def read_data():
             self.filename()
@@ -280,6 +281,7 @@ class App(tk.Tk):
         Thread(target=read_data, daemon=True).start()
 
     """ コマンド送信関数 """
+
     def send_data(self):
         if self.is_serial_connected:
             try:
@@ -293,6 +295,7 @@ class App(tk.Tk):
             messagebox.showerror("Error", "Serial connection is not established.")
 
     """ 定期通信用データ更新関数 """
+
     def update_data(self, data):
         img = PhotoImage(file='map.png')
         self.map_frame.create_image(0, 0, anchor='nw', image=img)
@@ -309,6 +312,7 @@ class App(tk.Tk):
             pass
 
     """センサデータ表示処理"""
+
     def sensor_data(self, data):
         time = data.get("time")
         gps = data.get("gps")
@@ -415,6 +419,7 @@ class App(tk.Tk):
         browser.quit()
 
     """メッセージ処理"""
+
     def text_data(self, data):
         time = data.get("time")
         message = data.get("message")
@@ -422,6 +427,7 @@ class App(tk.Tk):
         self.data_text.insert(text=f"message: {message}")
 
     """Excelファイル名を生成"""
+
     def filename(self):
         now = datetime.now()
         self.excel_file_name = "start_" + now.strftime("%Y-%m-%d_%H-%M-%S") + ".xlsx"
@@ -439,6 +445,7 @@ class App(tk.Tk):
         df.to_excel(self.excel_file_name, index=False)
 
     """データ保存処理"""
+
     def save_to_excel(self, data):
         df = pd.read_excel(self.excel_file_name)
         df = pd.concat([df, pd.DataFrame([data])], ignore_index=True)
@@ -516,8 +523,8 @@ class App(tk.Tk):
         self.i = self.i + 1
         """
 
-
     """写真処理"""
+
     def picture_data(self, data):
         picture = data.get("camera")
         img_stream = io.BytesIO(picture)
@@ -528,11 +535,13 @@ class App(tk.Tk):
         self.cvs.image = photo
 
     """土壌水分データ処理"""
+
     def soil_data(self, data):
         soil = data.get("soil_moisture")
         self.soil_label.configure(text=f"soil: {soil}")
 
     """終了処理"""
+
     def close(self):
         self.is_serial_connected = False
         if self.serial_port:
@@ -540,6 +549,7 @@ class App(tk.Tk):
         self.destroy()
 
     """スクロールバー"""
+
     class ScrollableFrame(tk.Frame):
         def __init__(self, parent, *args, **kwargs):
             super().__init__(parent, *args, **kwargs)
