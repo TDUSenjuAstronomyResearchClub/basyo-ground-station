@@ -1,4 +1,5 @@
 import json
+import string
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
@@ -8,10 +9,9 @@ import serial
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import folium
-from openpyxl.workbook import Workbook
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions as ec
 from PIL import Image, ImageTk
 import io
 import os
@@ -149,6 +149,7 @@ class App(tk.Tk):
         self.comand_label = tk.Label(self.command_frame, text=comand, font=("Arial", 10))
         self.comand_label.pack(pady=10)
 
+        # メッセージ表示用
         self.data_text = tk.Entry(self.command_frame, width=40)
         self.data_text.pack(ipady=10, pady=10, expand=True)
 
@@ -209,7 +210,7 @@ class App(tk.Tk):
         self.fig_canvas.get_tk_widget().pack(anchor='center', fill=tk.BOTH, expand=True)
         self.graphframe.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         self.graphframe.bind("<Configure>", self.on_frame_configure)
-        # fig.tight_layout()
+        fig.tight_layout()
 
         # 地図写真用frame
         self.center = tk.Frame(tab1)
@@ -224,9 +225,6 @@ class App(tk.Tk):
         self.map_frame.pack(expand=True)
 
         self.protocol("WM_DELETE_WINDOW", self.close)
-
-        # excel処理用
-        self.workbook = Workbook()
 
         # データ
         self.time_data = []
@@ -243,7 +241,7 @@ class App(tk.Tk):
         self.battery_data = []
         self.distance_data = []
 
-        self.i: int = 2
+        # self.i: int = 2
 
     def on_frame_configure(self, event):
         self.canvasleft.configure(scrollregion=self.canvasleft.bbox("all"))
@@ -358,15 +356,15 @@ class App(tk.Tk):
         self.angularvelocity_y_data.append(angularvelocity_y)
         angularvelocity_z = nine_axis['angular_velocity']['z']
         self.angularvelocity_z_data.append(angularvelocity_z)
-        Temperature = bme280['temperature']
-        self.Temperature_data.append(Temperature)
-        Humidity = bme280['humidity']
-        self.Humidity_data.append(Humidity)
-        Pressure = bme280['pressure']
-        self.Pressure_data.append(Pressure)
-        Latitude = gps['latitude']
-        Longitude = gps['longitude']
-        self.coordinates.append((Latitude, Longitude))
+        temperature = bme280['temperature']
+        self.Temperature_data.append(temperature)
+        humidity = bme280['humidity']
+        self.Humidity_data.append(humidity)
+        pressure = bme280['pressure']
+        self.Pressure_data.append(pressure)
+        latitude = gps['latitude']
+        longitude = gps['longitude']
+        self.coordinates.append((latitude, longitude))
         self.battery_data.append(battery)
         self.distance_data.append(distance)
 
@@ -413,7 +411,7 @@ class App(tk.Tk):
         wait = WebDriverWait(driver=browser, timeout=10)
         tmpurl = 'file://{path}/{mapfile}'.format(path=os.getcwd(), mapfile=map_file)
         browser.get(tmpurl)
-        wait.until(EC.presence_of_all_elements_located)
+        wait.until(ec.presence_of_all_elements_located)
         browser.save_screenshot("map.png")
         browser.close()
         browser.quit()
@@ -421,10 +419,11 @@ class App(tk.Tk):
     """メッセージ処理"""
 
     def text_data(self, data):
-        time = data.get("time")
-        message = data.get("message")
-        self.data_text.insert(text=f"Time: {time}")
-        self.data_text.insert(text=f"message: {message}")
+        time: string = str(data.get("time"))
+        message: string = str(data.get("message"))
+        self.data_text.insert(tk.END, time)
+        self.data_text.insert(tk.END, message)
+        self.data_text.setvar()
 
     """Excelファイル名を生成"""
 
@@ -446,7 +445,8 @@ class App(tk.Tk):
 
     """コラムと連動させる"""
 
-    def to_excel_dict(self, record):
+    @staticmethod
+    def to_excel_dict(record):
         return {
             'gps.latitude': record['gps']['latitude'],
             'gps.longitude': record['gps']['longitude'],
