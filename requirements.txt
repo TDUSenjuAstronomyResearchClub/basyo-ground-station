@@ -18,5 +18,5 @@ tkhtmlview==0.2.0
 tkinterhtml==0.7
 tkinterweb==3.23.2
 # ujson==5.4.0
-Workbook==1.1
+# Workbook==1.1
 openpyxl==3.1.2
