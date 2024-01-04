@@ -6,7 +6,7 @@ Pillow==9.4.0
 pywebview==4.2.2
 selenium==4.15.2
 fastjsonschema==2.16.2
-imagecodecs==2021.8.26
+# imagecodecs==2021.8.26
 imageio==2.26.0
 imagesize==1.4.1
 json5==0.9.6
@@ -17,4 +17,6 @@ pyserial==3.5
 tkhtmlview==0.2.0
 tkinterhtml==0.7
 tkinterweb==3.23.2
-ujson==5.4.0
+# ujson==5.4.0
+Workbook==1.1
+openpyxl==3.1.2
