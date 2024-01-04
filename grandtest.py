@@ -423,7 +423,6 @@ class App(tk.Tk):
         message: string = str(data.get("message"))
         self.data_text.insert(tk.END, "time: " + time + "_")
         self.data_text.insert(tk.END, "message: " + message + "\n")
-        self.data_text.setvar()
 
     """Excelファイル名を生成"""
 
