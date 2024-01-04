@@ -8,6 +8,7 @@ import serial
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import folium
+from openpyxl.workbook import Workbook
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -21,7 +22,7 @@ import time as t
 """COMportを確認し適時変更する"""
 port = "COM7"
 
-comand = ("コマンド一覧\ndestination: サンプル採取地点または\nゴール地点の緯度、経度の変更\nfall:機体の落下開始判定\n"
+comand = ("コマンド一覧\ndestination:サンプル採取地点または\nゴール地点の緯度、経度の変更\nfall:機体の落下開始判定\n"
           "landing:機体の着地判定\n//manual:手動制御\n***以降manualで使用***\npicture:写真撮影\nsoil_moisture:土壌水分測定\n"
           "sample:サンプル採取\nw:前進\na:左旋回\nd:右旋回\ns:後退")
 
@@ -225,6 +226,9 @@ class App(tk.Tk):
 
         self.protocol("WM_DELETE_WINDOW", self.close)
 
+        #excel処理用
+        self.workbook = Workbook()
+
         # データ
         self.time_data = []
         self.acceleration_x_data = []
@@ -239,6 +243,8 @@ class App(tk.Tk):
         self.coordinates = []
         self.battery_data = []
         self.distance_data = []
+
+        self.i: int = 2
 
     def on_frame_configure(self, event):
         self.canvasleft.configure(scrollregion=self.canvasleft.bbox("all"))
@@ -258,6 +264,7 @@ class App(tk.Tk):
             self.serial_port.close()
             self.button.configure(text="Start Communication")
 
+
     """シリアル通信動作関数"""
     def read_serial_data(self):
         def read_data():
@@ -268,8 +275,6 @@ class App(tk.Tk):
                     json_data = json.loads(data)
                     self.save_to_excel(json_data)
                     self.update_data(json_data)
-
-
                 except Exception as e:
                     print(str(e))
 
@@ -422,11 +427,97 @@ class App(tk.Tk):
         now = datetime.now()
         self.excel_file_name = "start_" + now.strftime("%Y-%m-%d_%H-%M-%S") + ".xlsx"
 
+        df = pd.DataFrame(columns=[
+            "data_type", "time", "gps.latitude", "gps.longitude", "gps.altitude",
+            "gps.distance.sample", "gps.distance.goal", "gps.azimuth.sample", "gps.azimuth.goal",
+            "nine_axis.acceleration.x", "nine_axis.acceleration.y", "nine_axis.acceleration.z",
+            "nine_axis.angular_velocity.x", "nine_axis.angular_velocity.y", "nine_axis.angular_velocity.z",
+            "nine_axis.azimuth",
+            "bme280.temperature", "bme280.humidity", "bme280.pressure",
+            "lps25hb.temperature", "lps25hb.pressure", "lps25hb.altitude",
+            "battery", "distance", "camera", "soil_moisture", "message"
+        ])
+        df.to_excel(self.excel_file_name, index=False)
+
     """データ保存処理"""
     def save_to_excel(self, data):
-        """df = pd.DataFrame(data)
-        df.to_excel(self.excel_file_name, index=False)
+        df = pd.read_excel(self.excel_file_name)
+        df = pd.concat([df, pd.DataFrame([data])], ignore_index=True)
+        print(df)
+
+        # 保存
+        with pd.ExcelWriter(self.excel_file_name, engine='openpyxl', mode='a', if_sheet_exists="overlay") as writer:
+            df.to_excel(writer, index=False)
+
         """
+        sheet = self.workbook.active
+        time = data.get("time")
+        gps = data.get("gps")
+        nine_axis = data.get("nine_axis")
+        bme280 = data.get("bme280")
+        battery = data.get("battery")
+        distance = data.get("distance")
+        lps25hb = data.get("lps25hb")
+        # ヘッダーの書き込み
+        sheet["A1"] = "Time"
+        sheet["B1"] = "Latitude"
+        sheet["C1"] = "Longitude"
+        sheet["D1"] = "Altitude"
+        sheet["E1"] = "Sample Distance"
+        sheet["F1"] = "Sample Azimuth"
+        sheet["G1"] = "Goal Distance"
+        sheet["H1"] = "Goal Azimuth"
+        sheet["I1"] = "acc x"
+        sheet["J1"] = "acc y"
+        sheet["K1"] = "acc z"
+        sheet["L1"] = "vel x"
+        sheet["M1"] = "vel y"
+        sheet["N1"] = "vel z"
+        sheet["O1"] = "9 azi"
+        sheet["P1"] = "bme tem"
+        sheet["Q1"] = "bme hum"
+        sheet["R1"] = "bme pre"
+        sheet["S1"] = "lps tem"
+        sheet["T1"] = "lps pre"
+        sheet["U1"] = "lps alt"
+        sheet["V1"] = "battery"
+        sheet["W1"] = "distance"
+        sheet["X1"] = "camera"
+        sheet["Y1"] = "soil"
+        sheet["Z1"] = "message"
+
+        # JSONデータの書き込み
+
+        sheet.cell(row=self.i, column=1, value=data['time'])
+        sheet.cell(row=self.i, column=2, value=data['gps']['latitude'])
+        sheet.cell(row=self.i, column=3, value=data['gps']['longitude'])
+        sheet.cell(row=self.i, column=4, value=data['gps']['altitude'])
+        sheet.cell(row=self.i, column=5, value=data['gps']['distance']['sample'])
+        sheet.cell(row=self.i, column=6, value=data['gps']['azimuth']['sample'])
+        sheet.cell(row=self.i, column=7, value=data['gps']['distance']['goal'])
+        sheet.cell(row=self.i, column=8, value=data['gps']['azimuth']['goal'])
+        sheet.cell(row=self.i, column=9, value=data['nine_axis']['acceleration']['x'])
+        sheet.cell(row=self.i, column=10, value=data['nine_axis']['acceleration']['y'])
+        sheet.cell(row=self.i, column=11, value=data['nine_axis']['acceleration']['z'])
+        sheet.cell(row=self.i, column=12, value=data['nine_axis']['angular_velocity']['x'])
+        sheet.cell(row=self.i, column=13, value=data['nine_axis']['angular_velocity']['y'])
+        sheet.cell(row=self.i, column=14, value=data['nine_axis']['angular_velocity']['z'])
+        sheet.cell(row=self.i, column=15, value=data['nine_axis']['azimuth'])
+        sheet.cell(row=self.i, column=16, value=data['bme280']['temperature'])
+        sheet.cell(row=self.i, column=17, value=data['bme280']['humidity'])
+        sheet.cell(row=self.i, column=18, value=data['bme280']['pressure'])
+        sheet.cell(row=self.i, column=19, value=data['lps25hb']['temperature'])
+        sheet.cell(row=self.i, column=20, value=data['lps25hb']['pressure'])
+        sheet.cell(row=self.i, column=21, value=data['lps25hb']['altitude'])
+        sheet.cell(row=self.i, column=22, value=data['battery'])
+        sheet.cell(row=self.i, column=23, value=data['distance'])
+        sheet.cell(row=self.i, column=24, value=data['camera'])
+        sheet.cell(row=self.i, column=25, value=data['soil_moisture'])
+        sheet.cell(row=self.i, column=26, value=data['message'])
+        self.i = self.i + 1
+        """
+
+
     """写真処理"""
     def picture_data(self, data):
         picture = data.get("camera")
