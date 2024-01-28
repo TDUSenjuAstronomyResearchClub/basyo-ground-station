@@ -19,17 +19,27 @@ from datetime import datetime
 import pandas as pd
 
 """COMportを確認し適時変更する"""
-port = "COM7"
+port = "COM12"
 
 comand = ("コマンド一覧\ndestination:サンプル採取地点または\nゴール地点の緯度、経度の変更\nfall:機体の落下開始判定\n"
           "landing:機体の着地判定\n//manual:手動制御\n***以降manualで使用***\npicture:写真撮影\nsoil_moisture:土壌水分測定\n"
           "sample:サンプル採取\nw:前進\na:左旋回\nd:右旋回\ns:後退")
+
+ex_columns = ["data_type", "time", "gps.latitude", "gps.longitude", "gps.altitude",
+              "gps.distance.sample", "gps.distance.goal", "gps.azimuth.sample", "gps.azimuth.goal",
+              "nine_axis.acceleration.x", "nine_axis.acceleration.y", "nine_axis.acceleration.z",
+              "nine_axis.angular_velocity.x", "nine_axis.angular_velocity.y", "nine_axis.angular_velocity.z",
+              "nine_axis.azimuth",
+              "bme280.temperature", "bme280.humidity", "bme280.pressure",
+              "lps25hb.temperature", "lps25hb.pressure", "lps25hb.altitude",
+              "battery", "distance", "camera", "soil_moisture", "message"]
 
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
 
+        self.excel_file_name = None
         self.title("Serial Communication")
 
         # 通信ボタン
@@ -226,7 +236,7 @@ class App(tk.Tk):
 
         self.protocol("WM_DELETE_WINDOW", self.close)
 
-        # データ
+        # グラフ表示データ用
         self.time_data = []
         self.acceleration_x_data = []
         self.acceleration_y_data = []
@@ -240,8 +250,8 @@ class App(tk.Tk):
         self.coordinates = []
         self.battery_data = []
         self.distance_data = []
-
-        # self.i: int = 2
+        # excelデータ保存用
+        self.ex_row: int = 1
 
     def on_frame_configure(self, event):
         self.canvasleft.configure(scrollregion=self.canvasleft.bbox("all"))
@@ -265,21 +275,24 @@ class App(tk.Tk):
     """シリアル通信動作関数"""
 
     def read_serial_data(self):
+        self.ex_row = 1
+        self.filename()
+
         def read_data():
-            self.filename()
             while self.is_serial_connected:
                 try:
                     data = self.serial_port.readline().decode('utf-8').strip()
                     json_data = json.loads(data)
-                    self.save_to_excel(json_data)
+
                     self.update_data(json_data)
+                    self.save_to_excel(json_data)
+
                 except Exception as e:
                     print(str(e))
 
         Thread(target=read_data, daemon=True).start()
 
     """ コマンド送信関数 """
-
     def send_data(self):
         if self.is_serial_connected:
             try:
@@ -293,7 +306,6 @@ class App(tk.Tk):
             messagebox.showerror("Error", "Serial connection is not established.")
 
     """ 定期通信用データ更新関数 """
-
     def update_data(self, data):
         img = PhotoImage(file='map.png')
         self.map_frame.create_image(0, 0, anchor='nw', image=img)
@@ -310,7 +322,6 @@ class App(tk.Tk):
             pass
 
     """センサデータ表示処理"""
-
     def sensor_data(self, data):
         time = data.get("time")
         gps = data.get("gps")
@@ -411,13 +422,14 @@ class App(tk.Tk):
         wait = WebDriverWait(driver=browser, timeout=10)
         tmpurl = 'file://{path}/{mapfile}'.format(path=os.getcwd(), mapfile=map_file)
         browser.get(tmpurl)
+        # マップが生成されるのを待つ
         wait.until(ec.presence_of_all_elements_located)
-        browser.save_screenshot("map.png")
+        browser.save_screenshot("map.png")  #マップ画像の生成
+        # ブラウザを閉じる
         browser.close()
         browser.quit()
 
     """メッセージ処理"""
-
     def text_data(self, data):
         time: string = str(data.get("time"))
         message: string = str(data.get("message"))
@@ -425,131 +437,53 @@ class App(tk.Tk):
         self.data_text.insert(tk.END, "message: " + message + "\n")
 
     """Excelファイル名を生成"""
-
     def filename(self):
+        # 通信開始時刻をファイル名にする
         now = datetime.now()
-        self.excel_file_name = "start_" + now.strftime("%Y-%m-%d_%H-%M-%S") + ".xlsx"
-
-        df = pd.DataFrame(columns=[
-            "data_type", "time", "gps.latitude", "gps.longitude", "gps.altitude",
-            "gps.distance.sample", "gps.distance.goal", "gps.azimuth.sample", "gps.azimuth.goal",
-            "nine_axis.acceleration.x", "nine_axis.acceleration.y", "nine_axis.acceleration.z",
-            "nine_axis.angular_velocity.x", "nine_axis.angular_velocity.y", "nine_axis.angular_velocity.z",
-            "nine_axis.azimuth",
-            "bme280.temperature", "bme280.humidity", "bme280.pressure",
-            "lps25hb.temperature", "lps25hb.pressure", "lps25hb.altitude",
-            "battery", "distance", "camera", "soil_moisture", "message"
-        ])
-        df.to_excel(self.excel_file_name, index=False)
-
-    """コラムと連動させる"""
-
-    @staticmethod
-    def to_excel_dict(record):
-        return {
-            'gps.latitude': record['gps']['latitude'],
-            'gps.longitude': record['gps']['longitude'],
-            'gps.altitude': record['gps']['altitude'],
-            'gps.distance.sample': record['gps']['distance']['sample'],
-            'gps.distance.goal': record['gps']['distance']['goal'],
-            'gps.azimuth.sample': record['gps']['azimuth']['sample'],
-            'gps.azimuth.goal': record['gps']['azimuth']['goal'],
-            'nine_axis.acceleration.x': record['nine_axis']['acceleration']['x'],
-            'nine_axis.acceleration.y': record['nine_axis']['acceleration']['y'],
-            'nine_axis.acceleration.z': record['nine_axis']['acceleration']['z'],
-            'nine_axis.angular_velocity.x': record['nine_axis']['angular_velocity']['x'],
-            'nine_axis.angular_velocity.y': record['nine_axis']['angular_velocity']['y'],
-            'nine_axis.angular_velocity.z': record['nine_axis']['angular_velocity']['z'],
-            'nine_axis.azimuth': record['nine_axis']['azimuth'],
-            'bme280.temperature': record['bme280']['temperature'],
-            'bme280.humidity': record['bme280']['humidity'],
-            'bme280.pressure': record['bme280']['pressure'],
-            'lps25hb.temperature': record['lps25hb']['temperature'],
-            'lps25hb.pressure': record['lps25hb']['pressure'],
-            'bme280.altitude': record['bme280']['altitude']
-        }
+        self.excel_file_name = "start_" + now.strftime("%Y-%m-%d_%H-%M") + ".xlsx"
+        # ファイルがない場合生成
+        if not os.path.isfile(self.excel_file_name):
+            pd.DataFrame(columns=ex_columns).to_excel(self.excel_file_name, index=False)
 
     """データ保存処理"""
-
     def save_to_excel(self, data):
-        # df = pd.read_excel(self.excel_file_name)
-        df = pd.concat(pd.DataFrame(self.to_excel_dict(data)), ignore_index=False)
-        print(df)
-        # 保存
-        with pd.ExcelWriter(self.excel_file_name, engine='openpyxl', mode='a', if_sheet_exists="overlay") as writer:
-            df.to_excel(writer, index=False)
-        writer.close()
-
-        """
-        sheet = self.workbook.active
-        time = data.get("time")
-        gps = data.get("gps")
-        nine_axis = data.get("nine_axis")
-        bme280 = data.get("bme280")
-        battery = data.get("battery")
-        distance = data.get("distance")
-        lps25hb = data.get("lps25hb")
-        # ヘッダーの書き込み
-        sheet["A1"] = "Time"
-        sheet["B1"] = "Latitude"
-        sheet["C1"] = "Longitude"
-        sheet["D1"] = "Altitude"
-        sheet["E1"] = "Sample Distance"
-        sheet["F1"] = "Sample Azimuth"
-        sheet["G1"] = "Goal Distance"
-        sheet["H1"] = "Goal Azimuth"
-        sheet["I1"] = "acc x"
-        sheet["J1"] = "acc y"
-        sheet["K1"] = "acc z"
-        sheet["L1"] = "vel x"
-        sheet["M1"] = "vel y"
-        sheet["N1"] = "vel z"
-        sheet["O1"] = "9 azi"
-        sheet["P1"] = "bme tem"
-        sheet["Q1"] = "bme hum"
-        sheet["R1"] = "bme pre"
-        sheet["S1"] = "lps tem"
-        sheet["T1"] = "lps pre"
-        sheet["U1"] = "lps alt"
-        sheet["V1"] = "battery"
-        sheet["W1"] = "distance"
-        sheet["X1"] = "camera"
-        sheet["Y1"] = "soil"
-        sheet["Z1"] = "message"
-
-        # JSONデータの書き込み
-
-        sheet.cell(row=self.i, column=1, value=data['time'])
-        sheet.cell(row=self.i, column=2, value=data['gps']['latitude'])
-        sheet.cell(row=self.i, column=3, value=data['gps']['longitude'])
-        sheet.cell(row=self.i, column=4, value=data['gps']['altitude'])
-        sheet.cell(row=self.i, column=5, value=data['gps']['distance']['sample'])
-        sheet.cell(row=self.i, column=6, value=data['gps']['azimuth']['sample'])
-        sheet.cell(row=self.i, column=7, value=data['gps']['distance']['goal'])
-        sheet.cell(row=self.i, column=8, value=data['gps']['azimuth']['goal'])
-        sheet.cell(row=self.i, column=9, value=data['nine_axis']['acceleration']['x'])
-        sheet.cell(row=self.i, column=10, value=data['nine_axis']['acceleration']['y'])
-        sheet.cell(row=self.i, column=11, value=data['nine_axis']['acceleration']['z'])
-        sheet.cell(row=self.i, column=12, value=data['nine_axis']['angular_velocity']['x'])
-        sheet.cell(row=self.i, column=13, value=data['nine_axis']['angular_velocity']['y'])
-        sheet.cell(row=self.i, column=14, value=data['nine_axis']['angular_velocity']['z'])
-        sheet.cell(row=self.i, column=15, value=data['nine_axis']['azimuth'])
-        sheet.cell(row=self.i, column=16, value=data['bme280']['temperature'])
-        sheet.cell(row=self.i, column=17, value=data['bme280']['humidity'])
-        sheet.cell(row=self.i, column=18, value=data['bme280']['pressure'])
-        sheet.cell(row=self.i, column=19, value=data['lps25hb']['temperature'])
-        sheet.cell(row=self.i, column=20, value=data['lps25hb']['pressure'])
-        sheet.cell(row=self.i, column=21, value=data['lps25hb']['altitude'])
-        sheet.cell(row=self.i, column=22, value=data['battery'])
-        sheet.cell(row=self.i, column=23, value=data['distance'])
-        sheet.cell(row=self.i, column=24, value=data['camera'])
-        sheet.cell(row=self.i, column=25, value=data['soil_moisture'])
-        sheet.cell(row=self.i, column=26, value=data['message'])
-        self.i = self.i + 1
-        """
+        # データをDataFrameに追加
+        row_data = [
+            data['data_type'],
+            data['time'],
+            data['gps']['latitude'],
+            data['gps']['longitude'],
+            data['gps']['altitude'],
+            data['gps']['distance']['sample'],
+            data['gps']['distance']['goal'],
+            data['gps']['azimuth']['sample'],
+            data['gps']['azimuth']['goal'],
+            data['nine_axis']['acceleration']['x'],
+            data['nine_axis']['acceleration']['y'],
+            data['nine_axis']['acceleration']['z'],
+            data['nine_axis']['angular_velocity']['x'],
+            data['nine_axis']['angular_velocity']['y'],
+            data['nine_axis']['angular_velocity']['z'],
+            data['nine_axis']['azimuth'],
+            data['bme280']['temperature'],
+            data['bme280']['humidity'],
+            data['bme280']['pressure'],
+            data['lps25hb']['temperature'],
+            data['lps25hb']['pressure'],
+            data['lps25hb']['altitude'],
+            data['battery'],
+            data['distance'],
+            data['camera'],
+            data['soil_moisture'],
+            data['message']
+        ]
+        row = pd.DataFrame([row_data], columns=ex_columns)
+        # Excelファイルに追記保存
+        with pd.ExcelWriter(self.excel_file_name, engine='openpyxl', mode='a', if_sheet_exists='overlay') as writer:
+            row.to_excel(writer, sheet_name='Sheet1', startrow=self.ex_row, index=False, header=False)
+            self.ex_row = self.ex_row + 1   # 保存するrowの設定用
 
     """写真処理"""
-
     def picture_data(self, data):
         picture = data.get("camera")
         img_stream = io.BytesIO(picture)
@@ -560,13 +494,11 @@ class App(tk.Tk):
         # self.cvs.image = photo
 
     """土壌水分データ処理"""
-
     def soil_data(self, data):
         soil = data.get("soil_moisture")
         self.soil_label.configure(text=f"soil: {soil}")
 
     """終了処理"""
-
     def close(self):
         self.is_serial_connected = False
         if self.serial_port:
@@ -574,7 +506,6 @@ class App(tk.Tk):
         self.destroy()
 
     """スクロールバー"""
-
     class ScrollableFrame(tk.Frame):
         def __init__(self, parent, *args, **kwargs):
             super().__init__(parent, *args, **kwargs)
