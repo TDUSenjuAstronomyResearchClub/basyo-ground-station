@@ -13,17 +13,19 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from PIL import Image, ImageTk
+import time as t
 import io
 import os
 from datetime import datetime
 import pandas as pd
 
-"""COMportを確認し適時変更する"""
-port = "COM12"
+"""COMportを確認し適時変更する
+"""
+port = "COM8"
 
 comand = ("コマンド一覧\ndestination:サンプル採取地点または\nゴール地点の緯度、経度の変更\nfall:機体の落下開始判定\n"
-          "landing:機体の着地判定\n//manual:手動制御\n***以降manualで使用***\npicture:写真撮影\nsoil_moisture:土壌水分測定\n"
-          "sample:サンプル採取\nw:前進\na:左旋回\nd:右旋回\ns:後退")
+          "landing:機体の着地判定\nmanual:手動制御\n***以降manualで使用***\npicture:写真撮影\nsoil:土壌水分測定\n"
+          "forward:前進\nleft:左旋回\nright:右旋回\nreverse:後退\nend:終了")
 
 ex_columns = ["data_type", "time", "gps.latitude", "gps.longitude", "gps.altitude",
               "gps.distance.sample", "gps.distance.goal", "gps.azimuth.sample", "gps.azimuth.goal",
@@ -37,6 +39,9 @@ ex_columns = ["data_type", "time", "gps.latitude", "gps.longitude", "gps.altitud
 
 class App(tk.Tk):
     def __init__(self):
+        """GUI設定、保存関数
+        """
+
         super().__init__()
 
         self.excel_file_name = None
@@ -47,16 +52,15 @@ class App(tk.Tk):
         self.button.pack(anchor='ne', padx=10, pady=10)
         self.serial_port = None
         self.is_serial_connected = False
-        self.after(100, self.read_serial_data)  # シリアルデータの読み込みを開始
 
         # tab
         self.notebook = ttk.Notebook(self)
         tab1 = Frame(self)  # main用
         tab2 = Frame(self)  # graph用
-        # tab3 = Frame(self)  # map用
+        tab3 = Frame(self)  # soil用
         self.notebook.add(tab1, text="main")
         self.notebook.add(tab2, text="graph")
-        self.notebook.add(tab2, text="graph")
+        self.notebook.add(tab3, text="soil")
         self.notebook.pack(expand=True, fill="both")
 
         # 右側コマンド系frame
@@ -66,15 +70,15 @@ class App(tk.Tk):
         self.right.create_window((0, 0), window=self.command_frame, anchor=tk.NW)
 
         # 左側データ表示用frame
-        self.canvasleft = tk.Canvas(tab1, width=400, height=200, borderwidth=0, highlightthickness=0)
-        self.scrollable_lframe = tk.Frame(self.canvasleft)
+        self.leftcanvas = tk.Canvas(tab1, width=400, height=200, borderwidth=0, highlightthickness=0)
+        self.scrollable_lframe = tk.Frame(self.leftcanvas)
 
-        self.vsb = tk.Scrollbar(self.scrollable_lframe, orient=tk.VERTICAL, command=self.canvasleft.yview)
-        self.canvasleft.configure(yscrollcommand=self.vsb.set)
+        self.vsb = tk.Scrollbar(self.scrollable_lframe, orient=tk.VERTICAL, command=self.leftcanvas.yview)
+        self.leftcanvas.configure(yscrollcommand=self.vsb.set)
 
-        self.vsb.pack(side=tk.RIGHT, fill=tk.Y, expand=True)
-        self.canvasleft.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        self.canvasleft.create_window((0, 0), window=self.scrollable_lframe, anchor=tk.NW)
+        self.vsb.pack(side=tk.RIGHT, fill=tk.Y, )
+        self.leftcanvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.leftcanvas.create_window((0, 0), window=self.scrollable_lframe, anchor=tk.NW)
 
         self.scrollable_lframe.bind("<Configure>", self.on_frame_configure)
 
@@ -82,35 +86,44 @@ class App(tk.Tk):
         self.time_label = tk.Label(self.scrollable_lframe, text="Time:      ", font=("Arial", 11))
         self.time_label.pack(anchor='nw', pady=10)
 
-        self.latitude_label = tk.Label(self.scrollable_lframe, text="Latitude:      ", font=("Arial", 11))
+        self.latitude_label = tk.Label(self.scrollable_lframe, text="Latitude:      ",
+                                       font=("Arial", 11))
         self.latitude_label.pack(anchor='nw', pady=10)
 
-        self.longitude_label = tk.Label(self.scrollable_lframe, text="Longitude:        ", font=("Arial", 11))
+        self.longitude_label = tk.Label(self.scrollable_lframe, text="Longitude:        ",
+                                        font=("Arial", 11))
         self.longitude_label.pack(anchor='nw', pady=10)
 
-        self.altitude_label = tk.Label(self.scrollable_lframe, text="Altitude:      ", font=("Arial", 11))
+        self.altitude_label = tk.Label(self.scrollable_lframe, text="Altitude:      ",
+                                       font=("Arial", 11))
         self.altitude_label.pack(anchor='nw', pady=10)
 
         self.sample_distance_label = tk.Label(self.scrollable_lframe, text="Sample Distance:        ",
                                               font=("Arial", 11))
         self.sample_distance_label.pack(anchor='nw', pady=10)
 
-        self.sample_azimuth_label = tk.Label(self.scrollable_lframe, text="Sample Azimuth:      ", font=("Arial", 11))
+        self.sample_azimuth_label = tk.Label(self.scrollable_lframe, text="Sample Azimuth:      ",
+                                             font=("Arial", 11))
         self.sample_azimuth_label.pack(anchor='nw', pady=10)
 
-        self.goal_distance_label = tk.Label(self.scrollable_lframe, text="Goal Distance:        ", font=("Arial", 11))
+        self.goal_distance_label = tk.Label(self.scrollable_lframe, text="Goal Distance:        ",
+                                            font=("Arial", 11))
         self.goal_distance_label.pack(anchor='nw', pady=10)
 
-        self.goal_azimuth_label = tk.Label(self.scrollable_lframe, text="Goal Azimuth:      ", font=("Arial", 11))
+        self.goal_azimuth_label = tk.Label(self.scrollable_lframe, text="Goal Azimuth:      ",
+                                           font=("Arial", 11))
         self.goal_azimuth_label.pack(anchor='nw', pady=10)
 
-        self.acceleration_x_label = tk.Label(self.scrollable_lframe, text="Acceleration X:      ", font=("Arial", 11))
+        self.acceleration_x_label = tk.Label(self.scrollable_lframe, text="Acceleration X:      ",
+                                             font=("Arial", 11))
         self.acceleration_x_label.pack(anchor='nw', pady=10)
 
-        self.acceleration_y_label = tk.Label(self.scrollable_lframe, text="Acceleration Y:      ", font=("Arial", 11))
+        self.acceleration_y_label = tk.Label(self.scrollable_lframe, text="Acceleration Y:      ",
+                                             font=("Arial", 11))
         self.acceleration_y_label.pack(anchor='nw', pady=10)
 
-        self.acceleration_z_label = tk.Label(self.scrollable_lframe, text="Acceleration Z:      ", font=("Arial", 11))
+        self.acceleration_z_label = tk.Label(self.scrollable_lframe, text="Acceleration Z:      ",
+                                             font=("Arial", 11))
         self.acceleration_z_label.pack(anchor='nw', pady=10)
 
         self.angular_velocity_x_label = tk.Label(self.scrollable_lframe, text="Angular Velocity X:      ",
@@ -129,22 +142,24 @@ class App(tk.Tk):
                                                 font=("Arial", 11))
         self.angular_velocity_z_label.pack(anchor='nw', pady=10)
 
-        self.temperature_label = tk.Label(self.scrollable_lframe, text="Temperature:        ", font=("Arial", 11))
+        self.temperature_label = tk.Label(self.scrollable_lframe, text="Temperature:        ",
+                                          font=("Arial", 11))
         self.temperature_label.pack(anchor='nw', pady=10)
 
-        self.humidity_label = tk.Label(self.scrollable_lframe, text="Humidity:      ", font=("Arial", 11))
+        self.humidity_label = tk.Label(self.scrollable_lframe, text="Humidity:      ",
+                                       font=("Arial", 11))
         self.humidity_label.pack(anchor='nw', pady=10)
 
-        self.pressure_label = tk.Label(self.scrollable_lframe, text="Pressure:      ", font=("Arial", 11))
+        self.pressure_label = tk.Label(self.scrollable_lframe, text="Pressure:      ",
+                                       font=("Arial", 11))
         self.pressure_label.pack(anchor='nw', pady=10)
 
-        self.battery_label = tk.Label(self.scrollable_lframe, text="Battery:        ", font=("Arial", 11))
-        self.battery_label.pack(anchor='nw', pady=10)
-
-        self.distance_label = tk.Label(self.scrollable_lframe, text="Distance:      ", font=("Arial", 11))
+        self.distance_label = tk.Label(self.scrollable_lframe, text="Distance:      ",
+                                       font=("Arial", 11))
         self.distance_label.pack(anchor='nw', pady=10)
 
-        self.soil_label = tk.Label(self.scrollable_lframe, text="soil:      ", font=("Arial", 11))
+        self.soil_label = tk.Label(self.scrollable_lframe, text="soil:      ",
+                                   font=("Arial", 11))
         self.soil_label.pack(anchor='nw', pady=10)
 
         # command送信用
@@ -156,29 +171,56 @@ class App(tk.Tk):
         self.entry = tk.Entry(self.sendframe)
         self.entry.pack(side='right', pady=10, expand=True)
 
-        self.comand_label = tk.Label(self.command_frame, text=comand, font=("Arial", 10))
+        self.comand_label = tk.Label(self.command_frame, text=comand, font=("Arial", 12))
         self.comand_label.pack(pady=10)
 
         # メッセージ表示用
         self.data_text = tk.Entry(self.command_frame, width=40)
         self.data_text.pack(ipady=10, pady=10, expand=True)
 
+        # 地図写真用frame
+        self.center = tk.Frame(tab1)
+        self.center.pack(side=tk.TOP, fill=tk.BOTH)
+
+        # 写真用キャンバス
+        # self.cvs = tk.Canvas(self.center, width=500, height=200)
+        # self.cvs.pack(expand=True)
+
+        # 地図表示用のフレーム
+        self.map_frame = tk.Canvas(self.center, width=700, height=500)
+        self.map_frame.pack(expand=True)
+
         # グラフ
-        self.graphframe = tk.Frame(tab2, width=1000, height=800, borderwidth=0, highlightthickness=0)
-        fig, (self.acx, self.acy, self.acz, self.avx, self.avy, self.avz, self.tem, self.hum, self.pre,
-              self.dis) = plt.subplots(10, 1, sharex='all')
+        self.canvasgraph = tk.Canvas(tab2)
+        self.scrollable_graph = tk.Frame(self.canvasgraph, width=1000, height=800)
+        self.canvasgraph.pack(fill=tk.BOTH, expand=True)
+        self.canvasgraph.create_window((0, 0), window=self.scrollable_graph, anchor=tk.NW)
+        self.scrollable_graph.pack(fill=tk.BOTH, expand=True)
+
+        fig, (self.acx, self.acy, self.acz, self.avx, self.avy) \
+            = plt.subplots(5, 1, sharex='all')
         plt.xlabel('Time')
         self.acx.set_ylabel("Acc X")
         self.acy.set_ylabel("Acc Y")
         self.acz.set_ylabel("Acc Z")
         self.avx.set_ylabel("ang X")
         self.avy.set_ylabel("ang Y")
-        self.avz.set_ylabel("ang Z")
-        self.tem.set_ylabel("Temperature")
-        self.hum.set_ylabel("Humidity")
-        self.pre.set_ylabel("Pressure")
-        self.dis.set_ylabel("Distance")
         fig.tight_layout()
+
+        fig2, (self.tem, self.hum, self.pre, self.dis, self.avz) \
+            = plt.subplots(5, 1, sharex='all')
+        plt.xlabel('Time')
+        self.avz.set_ylabel("ang Z")
+        self.tem.set_ylabel("Tem")
+        self.hum.set_ylabel("Hum")
+        self.pre.set_ylabel("Pre")
+        self.dis.set_ylabel("Dis")
+        fig2.tight_layout()
+
+        fig3, (self.moi) = plt.subplots(1, 1)
+        plt.xlabel('Time')
+        self.moi.set_ylabel("Moi")
+        fig3.tight_layout()
 
         """
         self.acx=fig.add_subplot(6,2,1)
@@ -216,28 +258,18 @@ class App(tk.Tk):
         self.dis.set_ylabel("Distance")
         """
 
-        self.fig_canvas = FigureCanvasTkAgg(fig, self.graphframe)
-        self.fig_canvas.get_tk_widget().pack(anchor='center', fill=tk.BOTH, expand=True)
-        self.graphframe.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        self.graphframe.bind("<Configure>", self.on_frame_configure)
-        fig.tight_layout()
-
-        # 地図写真用frame
-        self.center = tk.Frame(tab1)
-        self.center.pack(side=tk.TOP, fill=tk.BOTH)
-
-        # 写真用キャンバス
-        # self.cvs = tk.Canvas(self.center, width=500, height=200)
-        # self.cvs.pack(expand=True)
-
-        # 地図表示用のフレーム
-        self.map_frame = tk.Canvas(self.center, width=700, height=500)
-        self.map_frame.pack(expand=True)
+        self.fig_canvas = FigureCanvasTkAgg(fig, self.scrollable_graph)
+        self.fig_canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.fig_canvas2 = FigureCanvasTkAgg(fig2, self.scrollable_graph)
+        self.fig_canvas2.get_tk_widget().pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+        self.fig_canvas3 = FigureCanvasTkAgg(fig3, tab3)
+        self.fig_canvas3.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
         self.protocol("WM_DELETE_WINDOW", self.close)
 
         # グラフ表示データ用
         self.time_data = []
+        self.time_data_soil = []
         self.acceleration_x_data = []
         self.acceleration_y_data = []
         self.acceleration_z_data = []
@@ -250,15 +282,17 @@ class App(tk.Tk):
         self.coordinates = []
         self.battery_data = []
         self.distance_data = []
+        self.moisture_data = []
         # excelデータ保存用
         self.ex_row: int = 1
 
     def on_frame_configure(self, event):
-        self.canvasleft.configure(scrollregion=self.canvasleft.bbox("all"))
-
-    """通信処理関数"""
+        self.leftcanvas.configure(scrollregion=self.leftcanvas.bbox("all"))
+        self.canvasgraph.configure(scrollregion=self.canvasgraph.bbox("all"))
 
     def toggle_communication(self):
+        """通信処理関数
+        """
         if not self.is_serial_connected:
             try:
                 self.serial_port = serial.Serial(port, 9600)
@@ -272,28 +306,28 @@ class App(tk.Tk):
             self.serial_port.close()
             self.button.configure(text="Start Communication")
 
-    """シリアル通信動作関数"""
-
     def read_serial_data(self):
+        """シリアル通信動作関数
+        """
         self.ex_row = 1
-        self.filename()
 
         def read_data():
+            self.filename()
             while self.is_serial_connected:
                 try:
                     data = self.serial_port.readline().decode('utf-8').strip()
                     json_data = json.loads(data)
-
-                    self.update_data(json_data)
                     self.save_to_excel(json_data)
+                    self.update_data(json_data)
 
                 except Exception as e:
                     print(str(e))
 
         Thread(target=read_data, daemon=True).start()
 
-    """ コマンド送信関数 """
     def send_data(self):
+        """ コマンド送信関数
+        """
         if self.is_serial_connected:
             try:
                 data = self.entry.get().strip()
@@ -305,8 +339,9 @@ class App(tk.Tk):
         else:
             messagebox.showerror("Error", "Serial connection is not established.")
 
-    """ 定期通信用データ更新関数 """
     def update_data(self, data):
+        """ 定期通信用データ更新関数
+        """
         img = PhotoImage(file='map.png')
         self.map_frame.create_image(0, 0, anchor='nw', image=img)
         data_type = data.get("data_type")
@@ -321,15 +356,15 @@ class App(tk.Tk):
         else:
             pass
 
-    """センサデータ表示処理"""
     def sensor_data(self, data):
+        """センサデータ表示処理
+        """
         time = data.get("time")
         gps = data.get("gps")
         nine_axis = data.get("nine_axis")
         bme280 = data.get("bme280")
-        battery = data.get("battery")
         distance = data.get("distance")
-        # lps25hb = data.get("lps25hb")
+        soil = data.get("soil_moisture")
 
         # データ表示
         self.time_label.configure(text=f"Time: {time}")
@@ -350,8 +385,8 @@ class App(tk.Tk):
         self.temperature_label.configure(text=f"Temperature: {bme280['temperature']}")
         self.humidity_label.configure(text=f"Humidity: {bme280['humidity']}")
         self.pressure_label.configure(text=f"Pressure: {bme280['pressure']}")
-        self.battery_label.configure(text=f"Battery: {battery}")
         self.distance_label.configure(text=f"Distance: {distance}")
+        self.soil_label.configure(text=f"soil: {soil}")
 
         # データを取得、追加
         self.time_data.append(time)
@@ -376,8 +411,8 @@ class App(tk.Tk):
         latitude = gps['latitude']
         longitude = gps['longitude']
         self.coordinates.append((latitude, longitude))
-        self.battery_data.append(battery)
         self.distance_data.append(distance)
+        # self.moisture_data.append(soil)
 
         # グラフにデータをプロット
         self.acx.clear()
@@ -398,15 +433,17 @@ class App(tk.Tk):
         self.hum.plot(self.time_data, self.Humidity_data)
         self.pre.clear()
         self.pre.plot(self.time_data, self.Pressure_data)
-        # self.bat.clear()
-        # self.bat.plot(self.time_data, self.battery_data)
         self.dis.clear()
         self.dis.plot(self.time_data, self.distance_data)
+        # self.moi.clear()
+        # self.moi.plot(self.time_data, self.moisture_data)
         self.fig_canvas.draw()
+        self.fig_canvas2.draw()
+        # self.fig_canvas3.draw()
 
         # 地図を作成
-        m = folium.Map(location=[0, 0], zoom_start=100)
-        # 座標にピンを立てる
+        m = folium.Map(location=[30.3747779, 130.95862], zoom_start=50)
+        #   座標にピンを立てる
         for coord in self.coordinates:
             folium.Marker(coord).add_to(m)
         # 座標を線で結ぶ
@@ -419,25 +456,29 @@ class App(tk.Tk):
         options = webdriver.ChromeOptions()
         options.add_argument('--headless')  # ヘッドレスモードでブラウザを起動
         browser = webdriver.Chrome(options=options)
-        wait = WebDriverWait(driver=browser, timeout=10)
         tmpurl = 'file://{path}/{mapfile}'.format(path=os.getcwd(), mapfile=map_file)
         browser.get(tmpurl)
         # マップが生成されるのを待つ
+        wait = WebDriverWait(driver=browser, timeout=15)
         wait.until(ec.presence_of_all_elements_located)
-        browser.save_screenshot("map.png")  #マップ画像の生成
+        t.sleep(2)
+        # マップ画像の生成
+        browser.save_screenshot("map.png")
         # ブラウザを閉じる
         browser.close()
         browser.quit()
 
-    """メッセージ処理"""
     def text_data(self, data):
-        time: string = str(data.get("time"))
+        """メッセージ処理
+        """
+        # time: string = str(data.get("time"))
         message: string = str(data.get("message"))
-        self.data_text.insert(tk.END, "time: " + time + "_")
+        # self.data_text.insert(tk.END, "time: " + time + "_")
         self.data_text.insert(tk.END, "message: " + message + "\n")
 
-    """Excelファイル名を生成"""
     def filename(self):
+        """Excelファイル名を生成
+        """
         # 通信開始時刻をファイル名にする
         now = datetime.now()
         self.excel_file_name = "start_" + now.strftime("%Y-%m-%d_%H-%M") + ".xlsx"
@@ -445,46 +486,62 @@ class App(tk.Tk):
         if not os.path.isfile(self.excel_file_name):
             pd.DataFrame(columns=ex_columns).to_excel(self.excel_file_name, index=False)
 
-    """データ保存処理"""
     def save_to_excel(self, data):
+        """データ保存処理
+        """
         # データをDataFrameに追加
         row_data = [
-            data['data_type'],
-            data['time'],
-            data['gps']['latitude'],
-            data['gps']['longitude'],
-            data['gps']['altitude'],
-            data['gps']['distance']['sample'],
-            data['gps']['distance']['goal'],
-            data['gps']['azimuth']['sample'],
-            data['gps']['azimuth']['goal'],
-            data['nine_axis']['acceleration']['x'],
-            data['nine_axis']['acceleration']['y'],
-            data['nine_axis']['acceleration']['z'],
-            data['nine_axis']['angular_velocity']['x'],
-            data['nine_axis']['angular_velocity']['y'],
-            data['nine_axis']['angular_velocity']['z'],
-            data['nine_axis']['azimuth'],
-            data['bme280']['temperature'],
-            data['bme280']['humidity'],
-            data['bme280']['pressure'],
-            data['lps25hb']['temperature'],
-            data['lps25hb']['pressure'],
-            data['lps25hb']['altitude'],
-            data['battery'],
-            data['distance'],
-            data['camera'],
-            data['soil_moisture'],
-            data['message']
+            self.get_value(data, 'data_type'),
+            self.get_value(data, 'time'),
+            self.get_nested_value(data, ['gps', 'latitude']),
+            self.get_nested_value(data, ['gps', 'longitude']),
+            self.get_nested_value(data, ['gps', 'altitude']),
+            self.get_nested_value(data, ['gps', 'distance', 'sample']),
+            self.get_nested_value(data, ['gps', 'distance', 'goal']),
+            self.get_nested_value(data, ['gps', 'azimuth', 'sample']),
+            self.get_nested_value(data, ['gps', 'azimuth', 'goal']),
+            self.get_nested_value(data, ['nine_axis', 'acceleration', 'x']),
+            self.get_nested_value(data, ['nine_axis', 'acceleration', 'y']),
+            self.get_nested_value(data, ['nine_axis', 'acceleration', 'z']),
+            self.get_nested_value(data, ['nine_axis', 'angular_velocity', 'x']),
+            self.get_nested_value(data, ['nine_axis', 'angular_velocity', 'y']),
+            self.get_nested_value(data, ['nine_axis', 'angular_velocity', 'z']),
+            self.get_nested_value(data, ['nine_axis', 'azimuth']),
+            self.get_nested_value(data, ['bme280', 'temperature']),
+            self.get_nested_value(data, ['bme280', 'humidity']),
+            self.get_nested_value(data, ['bme280', 'pressure']),
+            self.get_nested_value(data, ['lps25hb', 'temperature']),
+            self.get_nested_value(data, ['lps25hb', 'pressure']),
+            self.get_nested_value(data, ['lps25hb', 'altitude']),
+            self.get_value(data, 'battery'),
+            self.get_value(data, 'distance'),
+            self.get_value(data, 'camera'),
+            self.get_value(data, 'soil_moisture'),
+            self.get_value(data, 'message')
         ]
+
         row = pd.DataFrame([row_data], columns=ex_columns)
         # Excelファイルに追記保存
-        with pd.ExcelWriter(self.excel_file_name, engine='openpyxl', mode='a', if_sheet_exists='overlay') as writer:
-            row.to_excel(writer, sheet_name='Sheet1', startrow=self.ex_row, index=False, header=False)
-            self.ex_row = self.ex_row + 1   # 保存するrowの設定用
+        with pd.ExcelWriter(self.excel_file_name, engine='openpyxl',
+                            mode='a', if_sheet_exists='overlay') as writer:
+            row.to_excel(writer, sheet_name='Sheet1', startrow=self.ex_row,
+                         index=False, header=False)
+            self.ex_row = self.ex_row + 1  # 保存するrowの設定用
 
-    """写真処理"""
+    def get_nested_value(self, dictionary, keys):
+        try:
+            for key in keys:
+                dictionary = dictionary[key]
+            return str(dictionary)
+        except (KeyError, TypeError):
+            return ''
+
+    def get_value(self, dictionary, key):
+        return str(dictionary.get(key, ''))
+
     def picture_data(self, data):
+        """写真処理
+        """
         picture = data.get("camera")
         img_stream = io.BytesIO(picture)
         img = Image.open(img_stream)
@@ -493,20 +550,30 @@ class App(tk.Tk):
         # self.cvs.create_image(200, 150, image=photo, tag="mytest")
         # self.cvs.image = photo
 
-    """土壌水分データ処理"""
     def soil_data(self, data):
+        """土壌水分データ処理
+        """
+        time = data.get("time")
         soil = data.get("soil_moisture")
         self.soil_label.configure(text=f"soil: {soil}")
+        self.time_data_soil.append(time)
+        self.moisture_data.append(soil)
+        self.moi.clear()
+        self.moi.plot(self.time_data_soil, self.moisture_data)
+        self.fig_canvas3.draw()
 
-    """終了処理"""
     def close(self):
+        """終了処理
+        """
         self.is_serial_connected = False
         if self.serial_port:
             self.serial_port.close()
         self.destroy()
 
-    """スクロールバー"""
     class ScrollableFrame(tk.Frame):
+        """スクロールバー
+        """
+
         def __init__(self, parent, *args, **kwargs):
             super().__init__(parent, *args, **kwargs)
 
